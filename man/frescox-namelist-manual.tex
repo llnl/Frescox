@@ -32,7 +32,7 @@
 \textheight 22.0cm \textwidth 17.00cm
 %
 \title{\Huge Frescox}
-\date{Version FRESCOX-7.1, June 2020\\ LLNL-CODE-811517 }
+\date{Version FRESCOX-7.3, July 2025\\ LLNL-CODE-811517 }
 \author{I.J. Thompson
 %
 \\Nuclear Theory and Modeling Group
@@ -1044,6 +1044,7 @@ For\>TYPE\\
 \>15\>SHAPE\>Target second-order coupled by matrix elements read in.\\
 \>16\>SHAPE\>Target \& projectile simultaneous second-order coupled by matrix elements read in.\\
 \>17\>     \>Target \& projectile all-order coupled by matrix elements read in.\\
+\>18\>     \>Generate deformed spin-orbit forces from preceding TYPE=11 target deformations.\\
 \>20\>NUM\>Super-soft N-N potl. of de Tourreil \& Sprung (SSC(C))\\
 \>21\>NUM\>User-supplied N-N potential via subroutine NNPOT.
 \end{tabbing}
@@ -1392,6 +1393,11 @@ For TYPE=17, couplings, to all orders in RDEF, are calculated between all
 pairs of projectile and target states using the matrix eigensolution
 method of Kermode and Rowley, Phys. Rev. {\bf C48} (1993) 2326.
 The SHAPE and P0-P6 parameters on the TYPE=17 \&pot namelist are not used.
+
+For TYPE=18  generate deformed spin-orbit couplings from preceding TYPE=11 target 
+deformations.  The TYPE=11 namelist and the used central potential themselves should
+have nouse=T to remove those potentials  themselves  being included.
+Rescale the real part by P1, the imaginary part by P2.
 
 \newpage
 \subsection{\&OVERLAP namelists for one- and two-particle form factors}

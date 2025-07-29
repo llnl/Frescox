@@ -24,7 +24,7 @@
 #    modification are contained in the file COPYING.
 #
 #***********************************************************************
-setenv FRESCOXLIB ~/bin
+setenv FRESCOXLIB ~/binw/`arch`   # or other directory of your choice
 set path=($path $FRESCOXLIB)
 alias run	'chmod +x \!* ; nohup \!* >& \!*.out &'
 alias go	'chmod +x \!* ; nohup \!* >& \!*.out  '

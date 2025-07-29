@@ -2568,11 +2568,11 @@ C
       END
 *****TENSORS************************************************************
       FUNCTION TENSOR(TYPE,L,S1,J,S2,JT,LP,S1P,JP,S2P,LAM,K1,K2,K1P,K2P,
-     &                ZP,ZT,ITYP,ETA)
+     &                ZP,ZT,ITYP,TAU,ETA)
       IMPLICIT REAL*8(A-H,O-Z)
       real*8,intent(in):: S1,J,S2,JT,S1P,JP,S2P,K1,K2,K1P,K2P,ZP,ZT,ETA
-      integer,intent(in):: TYPE,L,LP,LAM,ITYP
-      REAL*8 J2,J2MIN,J2MAX
+      integer,intent(in):: TYPE,L,LP,LAM,ITYP,TAU
+      REAL*8 J2,J2MIN,J2MAX,TSL,TSLP
 C
 C   calculate matrix elements of spin tensors between partial waves:
 C
@@ -2600,6 +2600,7 @@ C           T(13)=                    =  table couplings of target
 C           T(14)=                    =  2nd-order projectile 
 C           T(15)=                    =  2nd-order target 
 C           T(16)=                    =  2nd-order projectile and target
+C           T(18)=                    =  Thomas spin-orbit projectile (TAU=1,2,3)
 C           T(24) = T(25) = T(26) = T(27) = ETA
 C           T(30) = L(L+1)
 C           T(others)                         not used here
@@ -2609,7 +2610,7 @@ C
       IF(LAM.EQ.0.AND.ABS(S1-S1P)+ABS(S2-S2P).GT.0.01 .OR.TYPE.LT.0)
      X   RETURN
       GO TO (05,15,15,35,45,55,65,75,85,15,105,115,105,115,145,145,145,  ! 0 to 16
-     x       1,1,1,1,1,1,1,  245,245,245,245,1,1,305), 		         ! 17-23, 24-30
+     x       1,180,1,1,1,1,1,  245,245,245,245,1,1,305), 		         ! 17-23, 24-30
      X       		TYPE+1
    1  RETURN
 C
@@ -2737,6 +2738,35 @@ C                                            2nd ORDER PROJECTILE AND/OR TARGET
  145  WRITE(KO,*) 'Normal 2nd-order algebra should not be called!'
       WRITE(KO,*) TYPE,L,S1,J,S2,JT,LP,S1P,JP,S2P,LAM,K1,K2,K1P,K2P,ITYP
 	stop
+
+ 180  CH = 0.0
+      J2MIN = MAX(ABS(S2-L),ABS(JT-S1),ABS(S2P-LP))
+      J2MAX = MIN(    S2+L,     JT+S1 ,   S2P+LP )
+      T1 = (-1)**NINT(J-JP-L+LP)* SQRT((2*J+1)*(2*JP+1))
+      NJ2=NINT(J2MAX-J2MIN)
+      DO 182 IJ2=0,NJ2
+      J2=J2MIN+IJ2
+         T2 = (2*J2+1) * RACAH(S1,L+Z,JT,S2,J,J2)
+     &                * RACAH(S1,LP+Z,JT,S2P,JP,J2)
+         C6 = ROTOR(J2,S2,L,S2P,LP,LAM,K2,ITYP.LE.11)
+ 182   CH = CH + T1 * T2 * C6
+      if (abs(S1-S1P)>0.01) CH = 0.0
+
+      TSL  =  J * (J+1.)  - L * (L+1.)   - S1*(S1+1)
+      TSLP = JP * (JP+1.) - LP * (LP+1.) - S1*(S1+1)
+      if (TAU==1) then
+C       IF(.NOT.(L.EQ.LP .AND. ABS(J-JP).LT.0.01)) RETURN
+        T3 = TSLP
+      else if (TAU==2) then
+        T3 = TSLP - TSL
+      else !  TAU==3
+        T3 = LAM*(LAM+1) - (TSL-TSLP)*(TSL-TSLP-1.)
+      endif
+      TENSOR = CH * T3
+C     write(6,181) LAM,TAU,L,LP,CH,TSL,TSLP,T3,TENSOR
+181   format('LAM,TAU,L,LP=',4i3,' ROTOR=',f8.4,' TSL/P=',2f9.3,
+     x       ' T3,TENS=',2f9.3)
+      RETURN
 
  245  IF(L.EQ.LP .AND. ABS(J-JP).LT.0.01) TENSOR = ETA
       RETURN
