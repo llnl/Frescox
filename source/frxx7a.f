@@ -1179,7 +1179,7 @@ C    -----------------------------------------------------
       REAL*8 MASS(4,MXP+1),HP(MXP),JEX(6,MXP,MXX),HPOT(MLOC)
       REAL*8 ENEX(2,MXP,MXX),QVAL(MXP+1),EMID(MSP),DELTAE(MSP)
       INTEGER NEX(MXP+1),BAND(2,MXP,MXX),COPY(2,MXP,MXX,2),
-     &  PKIND,ITC(MXP,MXX),CPOT(MXP,MXX),PTYPE(12,MLOC),TAU
+     &  PKIND,ITC(MXP,MXX),CPOT(MXP,MXX),PTYPE(12,MLOC)
       CHARACTER*8 NAME(2,MXP+1),COMM(4)
       CHARACTER*1 PSIGN(3)
 C
@@ -1202,7 +1202,7 @@ C    ---------
      X       ,SPINTR(2,MPAIR),ICORE,ICOREPP,KICORE,KICOREP,JCOM,JCOMP
       REAL*8 CCFRAC(MXPEX,2,MXPEX)
       INTEGER CP,ICTO,ICFROM,KIND,QQ,MATRIX(6,MPAIR),fails,
-     &        QC,QCMIN,QCMAX,QCM,LA,QCINC,DER,
+     &        QC,QCMIN,QCMAX,QCM,LA,QCINC,DER,TAU,TYPE,
      &        LOCF,FPT(7,MAXQRN),NKP(2),FIL,USEDLOW(MSP),USEDHIGH(MSP),
      &        ICOR(MAXCPL,2),ICOM(MAXCPL,2),GPT(2,MAXQRN),FILE,NFI(3)
       INTEGER FPT2(8,MAXQRN2)
@@ -1213,6 +1213,7 @@ C    ---------
       CHARACTER*12 REM(6),REOR(16),KSCAL(4),GRID(5),DSD(3)
       CHARACTER*9 LNL(2)
       CHARACTER*8 POTL(5),POPR(7),REALCM(2),RIC(3)
+      CHARACTER*32 COM
 C
 C    PARTIAL WAVES AND THEIR PARAMETERS
 C    ----------------------------------
@@ -1273,7 +1274,152 @@ C
       POTCAP(:,:) = 0
 C 	
 	IF(KIND>=11) GO TO 950
-      IF(KIND.NE.1) GO TO 100
+
+       iF(KIND .ne. 0) go to 300
+	KF = INFILE
+C
+C  General potential shapes from external form factors.
+C
+       LOCF = NF
+       NKP(1) = NIX + 1
+210    READ(KF,219,END=50) NP,HNP,RFS,FSCALE,TYPE,k,TAU,DER,IT,IB,IA,COM
+219   FORMAT(I4,3F8.4,7I4,A32)
+C      WRITE(6,219) NP,HNP,RFS,FSCALE,TYPE,k,TAU,DER,IT,IB,IA,COM
+
+
+      IF(ABS(FSCALE).LT.1E-20) GO TO 250
+
+      CALL CHECK(NP,MMX*MAXM,7)
+      IF(IB.EQ.0) IB = 1
+      IF(IA.EQ.0) IA = 1
+	if(IA>NEX(ICFROM)) then
+	 	write(KO,*) 'ERROR: THERE IS NO STATE ',IA,'
+     x		: only ',NEX(ICFROM),' in partition ',ICFROM
+		stop
+		endif
+	if(abs(IB)>NEX(ICTO)) then
+	 	write(KO,*) 'ERROR: THERE IS NO STATE ',IB,
+     x		': only ',NEX(ICTO),' in partition ',ICTO
+		stop
+		endif
+C
+      IF(IP1>0) THEN
+C                             Non-local form factor
+       ASCALE = FSCALE
+       NX = NLO
+       CALL CHECK(NLO,MAXNLO,9)
+       HTARG = HP(ICTO) * MR
+       NTARG = NLL
+       HNP = HTARG
+       NP = NLL
+      ELSE
+C                         Local form factor
+       ASCALE = FSCALE
+        NX = 1
+        HTARG = HP(ICTO)
+        NTARG = M + 1
+        NF = NF + 1
+        CALL CHECK(NF,MLOC,24)
+        HPOT(NF) = HP(ICTO)
+       ENDIF
+C
+      IF(IP1==0) WRITE(KO,20) NP,HNP,RFS, IB,TYPE,K,TAU,DER,IT,IA,COM
+20    FORMAT(/' Read ',I4,' point form factor at h =',F6.3,
+     x    ' fm from',f6.3,
+     &    ': <',I3,' / TYPE',i3,', K',i3,', TAU,DER,IT=',3i3,' /',I3,'>'
+     x     ,': ',A32)
+
+
+      WRITE(KO,22) FSCALE,abs(IB),IA
+C22    FORMAT( ' Scaled by',F9.4,' to excited pair ',I6,' from pair',I6/)
+
+C
+      IF(HNP.LT.1E-5) HNP = HTARG
+      DO 230 JX=1,NX
+       IF(IP3.GE.0) THEN
+         FORM(:,1:2) = 0.
+         IF(IP2.eq.0) READ(KF,*) (FORM(I,1),I=1,NP)
+         IF(IP2.eq.1) READ(KF,*) (FORM(I,2),I=1,NP)
+         IF(IP2.eq.2) READ(KF,*) (FORM(I,1),FORM(I,2),I=1,NP)
+         DO 223 I=1,NP
+          R1 = 0.0
+          R2 = 0.0
+          IF(mod(IP2,2).eq.0) R1 = FORM(I,1)
+          IF(IP2       .ge.1) R2 = FORM(I,2)
+          FRMC(I) = CMPLX(BETAR*R1,BETAI*R2)
+223       CONTINUE
+      ELSE
+C            NON-LOCAL:
+        DNL(JX) = (JX - NLC - 1) * MLT * HP(ICFROM)
+      ENDIF
+         DO 225 I=1,NTARG
+          R = (I-1) * HTARG
+          T2 = (R-RFS) / HNP
+          F8 = FFCI(T2,FRMC,NP)
+          IF(QQ.EQ.0) FORMF(I,NF) = F8 * ASCALE
+          IF(QQ.EQ.1.AND.IP3.GE.0) FNC(I,JX) = F8 * ASCALE
+          IF(QQ.EQ.1.AND.IP3.LT.0) FNC(I,JX) = R + (0.,1.)*(R + DNL(JX))
+225       CONTINUE
+230      CONTINUE
+
+      NIX = NIX + 1
+      CALL CHECK(NIX,MPAIR,16)
+      MATRIX(1,NIX) = ABS(IB)
+      MATRIX(2,NIX) = IA
+      MATRIX(3,NIX) = TYPE
+      MATRIX(4,NIX) = K
+      MATRIX(5,NIX) = TAU
+      MATRIX(6,NIX) = DER
+      MATRIX(7,NIX) = IT
+      MATRIX(8,NIX) = IP1
+C
+       if(TRENEG>=1.and.IP1==0) then
+        call openif(89)
+        WRITE(89,'(''#'',4i5)') NF,N,MR,3
+        WRITE(89,241) NIX,NF,IB,TYPE,K,TAU,DER,IT,IA
+241     FORMAT('# General potential shape ',i4,' at',I5,
+     &    ': <',I3,' / TYPE',i3,'K',i3,'TAU,DER,IT',3i3,' /',I3,'>')
+        DO 243 I=1,N,MR
+243     WRITE(89,144) (I-1)*HTARG,FORMF(I,NF)
+C144   FORMAT(1X,F8.3,1p,2g13.5)
+        WRITE(89,*) '&'
+        endif
+
+      IF(LISTCC.GE.2) THEN
+       IF(QQ.EQ.0) THEN
+              WRITE(KO,*) ' Form factor at ',NF,' is (after scaling) '
+              WRITE(KO,132) ((I-1)*HP(ICTO),FORMF(I,NF),I=1,N,MR)
+C132           FORMAT(4(1X,0P,F6.2,':',1P,2E11.3))
+        ELSE IF(IP3>-4) THEN
+           IF(LISTCC.GE.3) THEN
+            DO 245 I=1,NLL
+             WRITE(KO,40) (I-1)*HTARG
+C40           FORMAT(' At R-to =',F8.4,', the non-local range is')
+             WRITE(KO,44) (FNC(I,J),J=1,NLO)
+C44           FORMAT(5(1X,2F9.4))
+245          CONTINUE
+          ENDIF
+         CALL DISPLR(FNC,NLL,NLO,NLN,SCALR)
+           SCALI = SCALR * 1E-6
+         CALL DISPLI(FNC,NLL,NLO,NLN,SCALI)
+          DO 247 I=1,NLL
+           VOPT(I) = 0.
+           DO 247 J=1,NLO
+ 247        VOPT(I) = VOPT(I) + FNC(I,J) * MLT * HP(ICFROM)
+          WRITE(KO,44)
+          WRITE(KO,*) ' Low-energy local equivalent potential every ',
+     X                   HTARG
+          WRITE(KO,44) (VOPT(I),I=1,NLL)
+        ENDIF
+       ENDIF
+C
+      IF(IB.GT.0) GO TO 210
+C
+250   NKP(2) = NIX
+      GO TO 999
+
+
+300      IF(KIND.NE.1) GO TO 100
 	KF = INFILE
 C
 C  General projectile/target spin transfer, external form factors.
@@ -1289,8 +1435,8 @@ C
        LOCF = NF
        NKP(1) = NIX + 1
 10    if(IP3==1) then
-	READ(KF,119,END=50) FNP,HNP,FSCALE,LTR,PTR,TTR,IB,IA,COMM
- 	write(6,119) FNP,HNP,FSCALE,LTR,PTR,TTR,IB,IA,COMM
+	READ(KF,119,END=50) FNP,HNP,RFS,FSCALE,LTR,PTR,TTR,IB,IA,COMM
+ 	write(6,119) FNP,HNP,RFS,FSCALE,LTR,PTR,TTR,IB,IA,COMM
 	RFS = HNP
 	NP = nint(FNP)
        else
@@ -1347,22 +1493,22 @@ C                         Local form factor
         HPOT(NF) = HP(ICTO)
        ENDIF
 C
-      IF(IP3.GE.0) WRITE(KO,20) NP,HNP,RFS,COMM
-20    FORMAT(/' Read ',I4,' point form factor at h =',F6.3,
+      IF(IP3.GE.0) WRITE(KO,16) NP,HNP,RFS,COMM
+16    FORMAT(/' Read ',I4,' point form factor at h =',F6.3,
      x             ' fm from',f6.3,':',4A8)
       if(IP3>-5) then
-      WRITE(KO,21) FSCALE,LTR,PTR,TTR,abs(IB),IA
-21    FORMAT( ' Scaled by',F9.4,' for L-transfer',I3,
+      WRITE(KO,17) FSCALE,LTR,PTR,TTR,abs(IB),IA
+17    FORMAT( ' Scaled by',F9.4,' for L-transfer',I3,
      X',  projectile transfer',F4.1, ', and target transfer =',F5.1,
      X   ' to excited pair ',I6,' from pair',I6)
-      WRITE(KO,210) LOP,DER
-210   FORMAT(' Angular momentum operator itself:',i4,
+      WRITE(KO,18) LOP,DER
+18    FORMAT(' Angular momentum operator itself:',i4,
      x       '   on wf derivative:',I4/)
       SN = JEX(1,ICTO,ABS(IB))
       SNP= JEX(1,ICFROM,IA)
         if(FAIL3(SN,SNP,PTR).or.FRAC(SN+SNP+PTR)) then
-        write(ko,211) 'PROJ',SN,SNP,PTR,.not.FAIL3(SN,SNP,PTR)
-211     format(/' ****ERROR: NO ',a4,' COUPLING OF ',2f5.1,' with',f5.1,
+        write(ko,19) 'PROJ',SN,SNP,PTR,.not.FAIL3(SN,SNP,PTR)
+19      format(/' ****ERROR: NO ',a4,' COUPLING OF ',2f5.1,' with',f5.1,
      x    ' as Delta =',L2,' or integer-spin error')
 	stop
         endif
@@ -1370,7 +1516,9 @@ C
       JNP= JEX(2,ICFROM,IA)
         if(FAIL3(JN,JNP,TTR).or.FRAC(JN+JNP+TTR)) then
         write(ko,211) 'TARG',JN,JNP,TTR,.not.FAIL3(JN,JNP,TTR)
-	stop
+211     format(/' ****ERROR: NO ',a4,' COUPLING OF ',2f5.1,' with',f5.1,
+     x    ' as Delta =',L2,' or integer-spin error')
+        stop
         endif
       else 
       WRITE(KO,22) FSCALE,abs(IB),IA
@@ -1440,7 +1588,7 @@ C
        if(TRENEG>=1.and.IP1==0) then
         call openif(89)
         WRITE(89,'(''#'',4i5)') NF,N,MR,3
-        WRITE(89,141) NIX,NF,IA,LTR,PTR,TTR,LOP,DER,abs(IB)
+        WRITE(89,141) NIX,NF,IB,LTR,PTR,TTR,LOP,DER,IA
 141     FORMAT('# General multipole form factor ',i4,' at',I5,
      &    ': <',I3,' /',I2,2f4.0,2i4,' /',I3,'>')
         DO 143 I=1,N,MR
@@ -2760,9 +2908,9 @@ C
           WRITE(KO,1001) XMUT,XMUP,XLAM,XA,XB,XP,XQ,XJAC
 1001  	FORMAT(1X,8F10.5)
 	 if(IP2/=0) then
-        WRITE(KO,241) 'CORE'    ,HCOR*MR,VPOT(1:NLN,2)
-        WRITE(KO,241) 'OPTICAL' ,HSUB*MR,VPOT(1:NLN,1)
-241    FORMAT(' ',A8,' potential (step size ',F6.4,' fm) is',/,
+        WRITE(KO,88561) 'CORE'    ,HCOR*MR,VPOT(1:NLN,2)
+        WRITE(KO,88561) 'OPTICAL' ,HSUB*MR,VPOT(1:NLN,1)
+88561   FORMAT(' ',A8,' potential (step size ',F6.4,' fm) is',/,
      X  (1X,12F10.4) )
         endif
       ENDIF

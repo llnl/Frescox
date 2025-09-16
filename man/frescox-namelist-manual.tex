@@ -977,6 +977,7 @@ The output files are suitable to be reread later as input file
 
 \newpage
 \subsection{\&POT potential namelists}
+\label{potentials}
 %
 Each potential is started by a \&pot namelist with TYPE=0, defining the radii to be used
 and the diagonal Coulomb potential, followed by any number of further \&pot namelists with TYPE$>$0,
@@ -1844,15 +1845,17 @@ ICTO $<$ 0, except for KINDs 1 \& 2 where finer control is allowed.
 Couplings are only active for J $<$ JMAX and Radius $<$ RMX,
 (if JMAX=0, use JTMAX, and if RMX=0, use  RMATCH).
 
+\newpage
 \item[KIND]
-The couplings can be of 10 KINDs:
+The couplings can be of 12 KINDs:
 
+            = 0 : specific potential shape for specific transition\\
             = 1 : general spin transfer for projectile/transfer couplings\\
             = 2 : electromagnetic one-photon couplings\\
             = 3 : single-particle excitation of the projectile\\
             = 4 : single-particle excitation of the target\\
             = 5 : zero-range or LEA transfer with strength P1 and finite range radius P2 (in fm.)\\
-            = 6 : LEA transfer using $D_0$. \& $D$ from bound states\\
+            = 6 : LEA transfer using $D_0$ \& $D$ from bound states\\
             = 7 : finite-range transfer\\
             = 8 : non-orthogonality correction to a KIND 5,6,7 transfer\\
             = 9 : general partial-wave couplings\\
@@ -1876,6 +1879,87 @@ they appear.
 (So if all the amplitudes are already entered for a certain KIND
 of coupling, then the following namelist will be blank, to indicate
 no more \&cfp namelists are to be read).
+
+\paragraph{For KIND = 0} 
+\underline{General Potential Shape}\\
+For local external form factors on FILE `INFILE' [default 4]), to be given 
+coupling factors from the same {\tt TENSOR} routine as used for \&POT components
+described in section \ref{potentials}.\\
+
+IP1\\
+~~~  = 0 : local form factor
+\\   1 : non-local (two-dimensional) form factor
+%\\   2 : derivative local form factor
+%\\   3 : derivative non-local (two-dimensional) form factor (not implemented)
+
+%IT is 1 or 3 to make this component included only iteratively,\\
+% \hspace*{8mm} 2 or 3 to NOT subtract this component in KIND=3,4 single-particle  couplings, \\
+% \hspace*{8mm} `-'  to NOT use this form to couple channels (only  to make other forms, e.g. deformations).
+
+IP2\\
+~~~  = 0 : read in real values      
+\\   1 : read in imaginary values   
+\\   2 : read in complex values  
+
+
+ P1,P2 : scaling for the real and imaginary parts respectively.\\
+
+read FROM FILE `INFILE'  the following lines
+   (until a blank line):
+\begin{verbatim}
+Format 16.2: I4, 3F8.4,          5I4,               2I4,   4A8
+             NP, HNP,RFS,FSCALE, TYPE,k,TAU,DER,IT, IB,IA, COMMENT
+ for NP = number of radial points
+    HNP = step size
+    RFS = radius of first point
+    FSCALE = scaling factor to be applied
+    TYPE = type of potential in &POT section
+    k = multipole 1..6, with monopoles 0 diagonal and 7 off-diagonal
+    TAU =  part of Thomas deformed projectile spin-orbit in TYPE=18
+                1 for normal potential derivative,  dV/dr / r
+                2 for wf derivative, V/r d/dr
+                3 for V/(2r*r) 
+    DER = 0 for radial scalar, and 1 or TAU=2 for radial derivative.
+    IT = 1 or 3: make this component included only iteratively
+         2 or 3: NOT subtract this in KIND=3,4 single-particle couplings
+    IB  = excited-state pair fed by coupling 
+    IA  = excited-state pair feeding the coupling
+    COMMENT = comment for display in printout.
+\end{verbatim}
+%If LOP, DER cannot be read without error, they will be assumed both to be 0.\\
+% Then free format for the radial shapes, repeatedly until sufficient data is read.\\
+ 
+ If IP1 = 0, read local form factor from i=1 to NP.
+\\  1, read successively for j=1,NLO the non-local form factors  FNL(i,j), i=1 to NP   [NLO = RNL / max(HNL,HCM)]
+\\
+
+List of supported potential TYPEs:
+\begin{verbatim}
+   0  Central Coulomb
+   1  Central Volume
+   2  Central Derivative
+   3  Projectile Spin-orbit
+   4  Target spin-orbit
+   5  Projectile Tr tensor
+   6  Target Tr tensor
+   7  Joint spin-spin tensor
+   8  Joint spin-spin scalar
+   9  1 - Effective-mass
+  10  Projectile Deformed
+  11  Target Deformed
+  18  Thomas projectile spin-orbit 
+ \end{verbatim}
+%  12  Projectile table
+%  13  Target table
+%  14  Projectile second-order table
+%  15  Target second-order table
+%  16  Mutual second-order
+%  17  Projectile-target all-order matrix
+%  24  Central Volume  for (N-Z)/A Lane diagonal
+%  25  Central Derivative  for (N-Z)/A Lane diagonal
+%  26  Central Volume  for (N-Z)/A Lane coupling
+%  27  Central Derivative  for (N-Z)/A Lane coupling
+%  30  Central L(L+1)
 
 \paragraph{For KIND = 1:} 
 \underline{General Spin Transfer}
@@ -1915,13 +1999,13 @@ The order of form factors in the file must agree with the order called by a doub
 The order of form factors in the file must agree with the order called by a double loop of channels, with the `to' channel number varying more rapidly.
 \\
 
- P1,P2 : scaling for the real and imaginary parts (respectively).\\
+ P1,P2 : scaling for the real and imaginary parts respectively.\\
 
    If IP3 $\geq$  0, read FROM FILE `INFILE'  the following lines
    (until a blank line):
 \begin{verbatim}
 Format 16.2: I4, 3F8.4,          I4,  2F4.0,   4I4,            4A8
-             NP ,HNP,RFS,FSCALE, LTR, PTR,TTR, IB,IA, LOP,DIR, COMMENT
+             NP ,HNP,RFS,FSCALE, LTR, PTR,TTR, IB,IA, LOP,DER, COMMENT
  for NP = number of radial points
     HNP = step size
     RFS = radius of first point
@@ -1932,16 +2016,16 @@ Format 16.2: I4, 3F8.4,          I4,  2F4.0,   4I4,            4A8
     IB  = excited-state pair fed by coupling
     IA  = excited-state pair feeding the coupling
     LOP = 0 for angular momentum transfers, 1 for ang-mom. operator itself
-    DIR = 0 for radial scalar interaction, 1 for radial derivative
+    DER = 0 for radial scalar interaction, 1 for radial derivative
     COMMENT = comment for display in printout.
 \end{verbatim}
-If LOP, DIR cannot be read without error, they will be assumed both to be 0.\\
+If LOP, DER cannot be read without error, they will be assumed both to be 0.\\
  Then free format for the radial shapes, repeatedly until sufficient data is read.\\
 
 
  If IP1 =
-      0, read local form factor from i=1 to N
-\\  1, read successively for j=1,NLO the non-local form factors
+      0, read local form factor from i=1 to NP
+\\  =  1, read successively for j=1,NLO the non-local form factors
  FNL(i,j), i=1 to NP   [NLO = RNL / max(HNL,HCM)]
 
 

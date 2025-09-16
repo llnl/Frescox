@@ -1013,8 +1013,8 @@ C
         DO M=1,NF
         WRITE(89,'(''#'',4i5,f8.5)') M,MATCH,MR,1
         WRITE(89,141) (PTYPE(I,M),I=1,3),(PTYPE(I,M),I=7,8)
-141	format('# Optical potential KP=',i3,': type,multipole =',2i3.
-    x         ' TAU=',i1,' DER=',i1)
+141	format('# Optical potential KP=',i3,': type,multipole =',2i3,
+     x         ' TAU=',i1,' DER=',i1)
 	DO 83 I=1,MATCH,MR
 83      WRITE(89,144) RL(I),FORMF(I,M)
 144   FORMAT(1X,F8.3,1p,2g13.5)

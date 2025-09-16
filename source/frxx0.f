@@ -1426,7 +1426,7 @@ c     	   DM = DM + (QVAL(ICP)-QVAL(ICR))/AMU
 	maxqrn=0 ; maxqrn1=0 ; maxqrn2=0
 	mnpair=0; npair = 0
   110 if(nml) then
-	icto=0;icfrom=0;kind=0;ip1=0;ip2=0;ip3=0;ip4=-1;ip5=-1;infile=4
+	icto=0;icfrom=0;kind=-1;ip1=0;ip2=0;ip3=0;ip4=-1;ip5=-1;infile=4
 	p1=0;p2=0;jmax=0;rmax=0;kfrag=0;kcore=0;qcm=0;lam=0;nforms=0
 
 	 ios=0; nlcouplingend=0
@@ -1611,7 +1611,7 @@ c     	   DM = DM + (QVAL(ICP)-QVAL(ICR))/AMU
 !         write(ko,232) (qscale(i),i=max(0,-qq),abs(qq))
          write(ko,nml=scale) 
 	 endif
-	if(kind==1.and.qq==0) then
+	if( kind==0 .or. (kind==1.and.qq==0) ) then
 	   npair = 30   ! we do not know how much data in file 4!
 	   npair = max(npair,nint(expand(6)*mxx**2))   ! we do not know how much data in file 4!
 	   if(nforms==0) nf = nf+npair
@@ -1800,7 +1800,7 @@ c        kind = 3 & 4 :    s.p. inelastic form factors of multipole 'ik'
           endif
          endif
         endif
-	if(nq==0.and.kind/=1.and.kind/=9) then
+	if(nq==0.and.kind>1.and.kind/=9) then
 	  write(koe,*) ' Missing fractional overlaps! for coupling ',cp
 	  if(kind/=4.and.kind/=2.and.kind/=5.and.kind/=9) 
      x              write(koe,*) ' Projectile uses:',used(1,1:msp)
