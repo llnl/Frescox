@@ -976,7 +976,7 @@ C      IF(I.GT.0) STOP 'COULOMB MONOPOLES'
      x                PART(C1,1),EXCIT(C1,1)
       DO 215 C2=1,NCH
       IN = NCLIST(C1,C2)
-      write(89,211) C1,C2,IN
+      write(89,211) C1,C2,IN,EXCIT(C1,1),EXCIT(C2,1)
 	do I=1,IN
 	write(89,213) NFLIST(C1,C2,I),CLIST(C1,C2,I)
 	enddo

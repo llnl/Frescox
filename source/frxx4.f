@@ -47,11 +47,11 @@
       INTEGER CP,QQ,Q,ICOM(MAXCPL,2),ICOR(MAXCPL,2),GPT(2,MAXQRN),NG(2),
      &        FILE,CHNO(MFNL,6),LVAL(NCH),PART(NCH),EXCIT(MAXCH,3),
      &        COPY(2,MXP,MXX),QNF(19,MSP),CUTOFF,C1,C2,C2P,PARITY,
-     &        FPT(7,MAXQRN),ITC(MXP,MXX),MATRIX(6,MPAIR),C2LAST,
+     &        FPT(7,MAXQRN),ITC(MXP,MXX),MATRIX(9,MPAIR),C2LAST,
      &        NCLIST(MAXCH,MAXCH),NFLIST(MAXCH,MAXCH,MCLIST),NC,QC,LA,
      &        CPOT(MXP,MXX),PTYPE(12,MLOC),NEX(MXP)
       INTEGER PARITYP,BAND(2,MXP,MXX),PARITYJ,JPWCOUP(9,MPWCOUP)
-      INTEGER KMMI(3),KMMF(3),NFS(MLOC),POTCAP(MLOC,2),TAU,IDER
+      INTEGER KMMI(3),KMMF(3),NFS(MLOC),POTCAP(MLOC,2),TAU,IDER,TYPE
       LOGICAL REV,LOCAL,VREAL,REPEAT,LCL,MCL,R1DONE,REO,FAIL3,FRAC,PR,
      X   REVC,C1FR,LTRANS(MAXQRN),LCALL,MCALL,CPSO,SURF,  !,CPLD(NCH,NCH,0:4)
      x   LCLA,MCLA
@@ -93,8 +93,8 @@
   	REVC = REV.and..not.(CPSO.or.cxwf)  ! calculate full VSO matrix for now
 	if(LISTCC>0) write(48,*) ' For coupling # ',CP,': REVC =',REVC
 
-      GO TO (10,100,30,30,50,50,50,50,90,100,110),KIND
-C FOR KIND =  1   2  3  4  5  6  7  8  9, 10, 11
+      GO TO (120,10,100,30,30,50,50,50,50,90,100,110),KIND+1
+C FOR KIND = 0   1   2  3  4  5  6  7  8  9, 10, 11
 C
 C    SINGLE-PARTICLE INELASTIC EXCITATIONS (KIND=3 PROJ;  KIND=4 TARG)
 #ifdef corex
@@ -2155,14 +2155,14 @@ C    SO NOW NAME(1,IC1) IS LIKE D & NAME(1,IC2) LIKE P IN (D,P) REACTION
           DO 1202 C2P=1,NCH
           DO 1202 C2=1,NCH
 	    IF(IC2==PART(C2P).and.IC2==PART(C2)) then   ! both C2P,C2 in particle channels
-	    do 120 I=1,NCLIST(C2P,C2)
+	    do 1201 I=1,NCLIST(C2P,C2)
 	      KM = NFLIST(C2P,C2,I)
 	      !				find if KM already in list
 		do ifs=1,NFSS
-		if(NFS(ifs)==KM) go to 120  ! already
+		if(NFS(ifs)==KM) go to 1201  ! already
 		enddo
 		NFSS = NFSS+1;  NFS(NFSS)=KM  ! not already
-120	      continue
+1201	      continue
 	    endif
 1202	      continue
 	    if(LISTCC>0) write(KO,*) 
@@ -2523,6 +2523,45 @@ C            Make non-local overlap of sp wfns:
 
 	enddo ! IK
 C
+120    continue   !  KIND 0 external potential shapes
+      DO 129 IX=NG(1),NG(2)
+
+       IB = MATRIX(1,IX)
+       IA = MATRIX(2,IX)
+       TYPE = MATRIX(3,IX)
+       KK = MATRIX(4,IX)
+       TAU= MATRIX(5,IX)
+       DER= MATRIX(6,IX)
+       IT= MATRIX(7,IX)
+       IP1= MATRIX(8,IX)
+       KN = MATRIX(9,IX)
+
+       ETAS = 1.0  ! no isospin dependence here.
+       ITYP = 11   ! assume ordinary rotational model wanted.
+       
+      DO 128 C1=1,NCH
+        IF(ICTO.NE.PART(C1) .OR. EXCIT(C1,1).NE.IB) GO TO 128
+      DO 127 C2=1,NCH
+        IF(ICFROM.NE.PART(C2) .or. EXCIT(C2,1).NE.IA) GO TO 127
+        IC = ICFROM
+
+          CH =  TENSOR(TYPE, LVAL(C1),JPROJ(C1),JVAL(C1),JTARG(C1),
+     X                JTOTAL,LVAL(C2),JPROJ(C2),JVAL(C2),JTARG(C2),
+     X                KK,JEX(3,IC,IA),JEX(4,IC,IA),
+     X                 JEX(3,IC,IB),JEX(4,IC,IB),
+     X           MASS(3,IC),MASS(4,IC),ITYP,TAU,ETAS)
+       if(listcc>2) write(KO,*)'form',IX,TYPE,'at KN=',KN,'@',C1,C2,CH
+
+C                     Local form factor:
+           NC = NCLIST(C1,C2)+1
+	   if(NC>MCLIST) call check(NC,MCLIST,30)
+	   CLIST(C1,C2,NC) =  CH*(0.,1.)**(LVAL(C2)-LVAL(C1))
+	   NFLIST(C1,C2,NC) = KN
+	   NCLIST(C1,C2) =  NC
+127      continue
+128    continue
+
+129   continue
 
 300   if(allocated(MCG)) deallocate(MCG)
 C This next deallocation caused some x86_64 to crash (wierd)

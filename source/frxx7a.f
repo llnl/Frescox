@@ -1201,7 +1201,7 @@ C    ---------
       REAL*8 AFRAC(MXPEX,MXPEX,2,MSP),BEN(4,MXPEX,MXPEX),MEK(MPAIR)
      X       ,SPINTR(2,MPAIR),ICORE,ICOREPP,KICORE,KICOREP,JCOM,JCOMP
       REAL*8 CCFRAC(MXPEX,2,MXPEX)
-      INTEGER CP,ICTO,ICFROM,KIND,QQ,MATRIX(6,MPAIR),fails,
+      INTEGER CP,ICTO,ICFROM,KIND,QQ,MATRIX(9,MPAIR),fails,
      &        QC,QCMIN,QCMAX,QCM,LA,QCINC,DER,TAU,TYPE,
      &        LOCF,FPT(7,MAXQRN),NKP(2),FIL,USEDLOW(MSP),USEDHIGH(MSP),
      &        ICOR(MAXCPL,2),ICOM(MAXCPL,2),GPT(2,MAXQRN),FILE,NFI(3)
@@ -1287,7 +1287,7 @@ C
 C      WRITE(6,219) NP,HNP,RFS,FSCALE,TYPE,k,TAU,DER,IT,IB,IA,COM
 
 
-      IF(ABS(FSCALE).LT.1E-20) GO TO 250
+C     IF(ABS(FSCALE).LT.1E-20) GO TO 250
 
       CALL CHECK(NP,MMX*MAXM,7)
       IF(IB.EQ.0) IB = 1
@@ -1357,8 +1357,7 @@ C            NON-LOCAL:
           T2 = (R-RFS) / HNP
           F8 = FFCI(T2,FRMC,NP)
           IF(QQ.EQ.0) FORMF(I,NF) = F8 * ASCALE
-          IF(QQ.EQ.1.AND.IP3.GE.0) FNC(I,JX) = F8 * ASCALE
-          IF(QQ.EQ.1.AND.IP3.LT.0) FNC(I,JX) = R + (0.,1.)*(R + DNL(JX))
+
 225       CONTINUE
 230      CONTINUE
 
@@ -1372,13 +1371,15 @@ C            NON-LOCAL:
       MATRIX(6,NIX) = DER
       MATRIX(7,NIX) = IT
       MATRIX(8,NIX) = IP1
+      MATRIX(9,NIX) = NF
+
 C
        if(TRENEG>=1.and.IP1==0) then
         call openif(89)
         WRITE(89,'(''#'',4i5)') NF,N,MR,3
         WRITE(89,241) NIX,NF,IB,TYPE,K,TAU,DER,IT,IA
 241     FORMAT('# General potential shape ',i4,' at',I5,
-     &    ': <',I3,' / TYPE',i3,'K',i3,'TAU,DER,IT',3i3,' /',I3,'>')
+     &    ': <',I3,' / TYPE',i3,', K',i3,', TAU,DER,IT',3i3,' /',I3,'>')
         DO 243 I=1,N,MR
 243     WRITE(89,144) (I-1)*HTARG,FORMF(I,NF)
 C144   FORMAT(1X,F8.3,1p,2g13.5)
