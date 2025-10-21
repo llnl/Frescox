@@ -68,7 +68,7 @@ c
           WRITE(6,12) IT,LVAL,JVAL,JTOTAL,LVIN,JVIN,SMATR,SMATI
 	write(1,14) iwf,ENLAB,JTOTAL,PSIGN(PARITY+2),
      X			IT,LVAL,JVAL,LVIN,JVIN
-14  	FORMAT('@legend string',I3,' "E=',F6.2,f5.1,a1,
+14  	FORMAT('@legend string',I5,' "E=',F6.2,f5.1,a1,
      x	  ' #',I2,': lj',I3,f5.1,' <',I3,f5.1,'"')
            READ(5,*) (PSIR(I),PSII(I),I=1,N)
       	do 18 i=1,N

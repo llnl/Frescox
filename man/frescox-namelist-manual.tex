@@ -32,7 +32,7 @@
 \textheight 22.0cm \textwidth 17.00cm
 %
 \title{\Huge Frescox}
-\date{Version FRESCOX-7.3, July 2025\\ LLNL-CODE-811517 }
+\date{Version FRESCOX-7.3, Oct 2025\\ LLNL-CODE-811517 }
 \author{I.J. Thompson
 %
 \\Nuclear Theory and Modeling Group
@@ -1907,12 +1907,12 @@ IP2\\
 read FROM FILE `INFILE'  the following lines
    (until a blank line):
 \begin{verbatim}
-Format 16.2: I4, 3F8.4,          5I4,               2I4,   4A8
-             NP, HNP,RFS,FSCALE, TYPE,k,TAU,DER,IT, IB,IA, COMMENT
+Format 16.2: I4, 3F8.4,          5I4,               3I4,     4A8
+             NP, HNP,RFS,FSCALE, TYPE,k,TAU,DER,IT, IB,IA,M, COMMENT
  for NP = number of radial points
     HNP = step size
     RFS = radius of first point
-    FSCALE = scaling factor to be applied
+    FSCALE = scaling factor to be applied (effective if M=0)
     TYPE = type of potential in &POT section
     k = multipole 1..6, with monopoles 0 diagonal and 7 off-diagonal
     TAU =  part of Thomas deformed projectile spin-orbit in TYPE=18
@@ -1924,12 +1924,14 @@ Format 16.2: I4, 3F8.4,          5I4,               2I4,   4A8
          2 or 3: NOT subtract this in KIND=3,4 single-particle couplings
     IB  = excited-state pair fed by coupling 
     IA  = excited-state pair feeding the coupling
+    M = index to previous form read in with KIND=0 (M=0 if none).
+            (Note: if M>0, then current FSCALE is taken as 1.0)
     COMMENT = comment for display in printout.
 \end{verbatim}
 %If LOP, DER cannot be read without error, they will be assumed both to be 0.\\
 % Then free format for the radial shapes, repeatedly until sufficient data is read.\\
  
- If IP1 = 0, read local form factor from i=1 to NP.
+ If IP1 = 0 and M = 0, read local form factor from i=1 to NP.
 \\  1, read successively for j=1,NLO the non-local form factors  FNL(i,j), i=1 to NP   [NLO = RNL / max(HNL,HCM)]
 \\
 
@@ -2573,7 +2575,7 @@ pline2,col2,ratio2
 
 {\tt kind=}{\bf 1: Variable potential parameter:}\\
 {\tt kp}: number of potential as in \&pot namelist,\\
-{\tt pline}: order of which \&pot namelist within potential definition,\\
+{\tt pline}: order of which \&pot namelist within potential definition (not including empty namelists), \\
 {\tt col}:   number within namelist: selecting P0--P7 ,\\
 {\tt potential}: value of this potential parameter (default {\tt null}: use {\tt input\_file})\\
 {\tt pline2,col2}: if both assigned, then potential parameter at line {\tt pline2} and index {\tt col2} is automatically set to 
