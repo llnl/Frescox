@@ -883,7 +883,7 @@ C    ---------------------------------------------------
 	    IF(JTMIN.LT.Z .AND. JTOTAL.LE.-JTMIN-.1) GO TO 290
          IC1 = ICTO(CP)
          IC2 = ICFROM(CP)
-            IN1 = MOD(ABS(KIND(CP))-1,2)+1
+            IN1 = max(MOD(ABS(KIND(CP))-1,2)+1 , 1)
          IF(LISTCC.GT.2) WRITE(KO,1329) CP,ICTO(CP),ICFROM(CP),KIND(CP)
      x                  ,NLL(CP),NLN
  1329  FORMAT(/' Coupling #',I4,' to',I4,' from',I4,' of KIND=',i2,2i4)
@@ -980,7 +980,7 @@ C      IF(I.GT.0) STOP 'COULOMB MONOPOLES'
 	do I=1,IN
 	write(89,213) NFLIST(C1,C2,I),CLIST(C1,C2,I)
 	enddo
-211	format('#',4i5)
+211	format('#',5i5)
 212	format('##',i4,' LJ:',i5,3f6.1,2i4)
 213	format('#',i5,1p,2e14.6)
 215   continue

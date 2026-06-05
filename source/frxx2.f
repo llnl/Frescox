@@ -46,7 +46,7 @@
      x       IM(MMX*N),FORMDEF(12,MLOC)
       LOGICAL PT(2),WRIT25,itt,LDEPP,HASO(KPMAX),STOP19,nosub,DUPOT,SHNG
      x       ,lanecoup,nouse
-      INTEGER KPOP(KPMAX),FIRSTDEF,LASTDEF,TAU
+      INTEGER KPOP(KPMAX),FIRSTDEF,LASTDEF,TAU,FILTER(3)
       INTEGER PTYPE(12,MLOC),SHAPE,SHAPEI,TRENEG,TYPE,TYPEI,LOC(0:7),
      X        MATRIX(9,MPAIR), NEX(MXP),CPOT(MXP,MXX),COPY(2,MXP,MXX),
      X        LAMBDA(MLOC),NCHPMAX(MXP),KKA,LSHAPE(MLOC),LDEP(MLOC)
@@ -601,11 +601,14 @@ C					The monopole is replaced completely!
          WRITE(KO,179) KP,TYPE,WHO(TYPE+1),cit,'Thomas     ',MF,
      X             (DEF(K),K=1,2)    
 
+       FILTER = (/ 0, 0, 0/)
+C      write(6,*) 'TAU filter',FILTER
          do NFDEF=FIRSTDEF,LASTDEF   ! new spin-orbit forms
               ITYP = PTYPE(2,NFDEF)
               KK = PTYPE(3,NFDEF)
               K = KK; if(KK==7) K=0
             do TAU=1,3              ! KSO=1: normal derivative. 2: wf deriv, 3: V/r^2
+              if (FILTER(TAU)==1) cycle
               NF = NF+1
               CALL CHECK(NF,MLOC,24)
               HPOT(NF) = H
@@ -959,8 +962,8 @@ C			Have potential form. Print it out if required:
           DO 115 M=MIN(MF,NF),NF
          IF(ABS(PTYPE(5,M))+PTYPE(3,M).EQ.0.AND.TRENEG.LT.3)GOTO115
 	 if(SHAPE>=40) go to 115
-            WRITE(KO,110) M,PTYPE(3,M)
-110         FORMAT(/' Potential Form at',I4,' (Q=',i2,') is')
+            WRITE(KO,110) M,PTYPE(3,M),PTYPE(7,M)
+110         FORMAT(/'Potential Form at',I4,' (Q=',i2,', TAU=',i2,') is')
             WRITE(KO,120) (RL(I),FORMF(I,M),I=1,MATCH,MR)
 115       CONTINUE
 120         FORMAT(5(1X,F5.1,':',2F9.4,1X))
