@@ -395,8 +395,8 @@ C    ---------
       W = WAYS(1)
       IF(REV(CP)) W = WAYS(2)
       IF(JMAX(CP).lt..01) JMAX(CP) = JTMAX + 0.51
-      IF(RMAX(CP).lt..01) RMAX(CP) = abs(RMATCH) - 3*HCM
-!      IF(RMAX(CP).lt..01) RMAX(CP) = abs(RMATCH) 
+!      IF(RMAX(CP).lt..01) RMAX(CP) = abs(RMATCH) - 3*HCM
+      IF(RMAX(CP).lt..01) RMAX(CP) = abs(RMATCH) 
       NLL(CP) = MIN(NLN, NINT(RMAX(CP)/RINTP)+1 )
       LOCF(CP) = 0
       KLT(CP) = 1
