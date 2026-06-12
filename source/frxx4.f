@@ -2002,12 +2002,11 @@ C                         L-dependent additional factor:
       CALL FNLREAD(FNC,NLN,NLL,NLO,HP(ICTO)*MR,DNL, LN,SN,JN,
      X           C1,C2,LVAL(C1),LVAL(C2),JPROJ(C1),JPROJ(C2),JTARG(C1),
      X           JTARG(C2),JVAL(C1),JVAL(C2),JTOTAL,INFILE,CH)
-!	write(450,*) BETAR,BETAI
         DO 15 I=1,NLL
         DO 15 J=1,NLO
         CCO = FNC(I,J) * CH
         FNC(I,J) = dcmplx(real(CCO)*BETAR,dimag(CCO)*BETAI)
-!  	 write(450,16) I,J,FNC(I,J) !,CCO
+!       write(450,16) I,J,FNC(I,J) !,CCO
 15	continue
 16	format(2i5,2f12.5,' from ',2f12.5)
 	if(NLPL>0) then
@@ -2524,44 +2523,71 @@ C            Make non-local overlap of sp wfns:
 	enddo ! IK
 C
 120    continue   !  KIND 0 external potential shapes
+
+       
+      DO 128 C1=1,NCH
+      DO 127 C2=1,NCH
+
+
       DO 129 IX=NG(1),NG(2)
 
        IB = MATRIX(1,IX)
        IA = MATRIX(2,IX)
+       if(IA*IB==0) go to 129
+
+        IF(ICTO.NE.PART(C1) .OR. EXCIT(C1,1).NE.IB) GO TO 129
+        IF(ICFROM.NE.PART(C2) .or. EXCIT(C2,1).NE.IA) GO TO 129
+        IC = ICFROM
+
+
+
        TYPE = MATRIX(3,IX)
        KK = MATRIX(4,IX)
        TAU= MATRIX(5,IX)
-       DER= MATRIX(6,IX)
+       IDER= MATRIX(6,IX)
        IT= MATRIX(7,IX)
        IP1= MATRIX(8,IX)
        KN = MATRIX(9,IX)
 
+      PTYPE(1,KN) = 0
+      PTYPE(2,KN) = TYPE
+      PTYPE(3,KN) = KK
+      PTYPE(4,KN) = IX-NG(1)+1 ! for readers only
+      PTYPE(5,KN) = 0
+      PTYPE(6,KN) = 0
+      PTYPE(7,KN) = TAU
+      PTYPE(8,KN) = IDER
+      PTYPE(9:12,KN) = 0
+
        ETAS = 1.0  ! no isospin dependence here.
        ITYP = 11   ! assume ordinary rotational model wanted.
-       
-      DO 128 C1=1,NCH
-        IF(ICTO.NE.PART(C1) .OR. EXCIT(C1,1).NE.IB) GO TO 128
-      DO 127 C2=1,NCH
-        IF(ICFROM.NE.PART(C2) .or. EXCIT(C2,1).NE.IA) GO TO 127
-        IC = ICFROM
+
 
           CH =  TENSOR(TYPE, LVAL(C1),JPROJ(C1),JVAL(C1),JTARG(C1),
      X                JTOTAL,LVAL(C2),JPROJ(C2),JVAL(C2),JTARG(C2),
      X                KK,JEX(3,IC,IA),JEX(4,IC,IA),
      X                 JEX(3,IC,IB),JEX(4,IC,IB),
      X           MASS(3,IC),MASS(4,IC),ITYP,TAU,ETAS)
-       if(listcc>2) write(KO,*)'form',IX,TYPE,'at KN=',KN,'@',C1,C2,CH
+     X     * (0.,1.)**(LVAL(C2)-LVAL(C1))
+
+C      if(listcc>2) write(KO,*)'form',IX,TYPE,'at KN=',KN,'@',C1,C2,CH
+       if(abs(CH)<1d-10) go to 129
+
+       if(listcc>2) 
+     x write(KO,125) C1,C2,KN,TYPE,KK,TAU,IDER,IT,CH,PTYPE(1:8,KN)
+125    format('For',I5,' from',I5,' by form',I5,' (',5I3,') get',2F15.6
+     x         ,8i3)
 
 C                     Local form factor:
            NC = NCLIST(C1,C2)+1
 	   if(NC>MCLIST) call check(NC,MCLIST,30)
-	   CLIST(C1,C2,NC) =  CH*(0.,1.)**(LVAL(C2)-LVAL(C1))
+	   CLIST(C1,C2,NC) =  CH 
 	   NFLIST(C1,C2,NC) = KN
 	   NCLIST(C1,C2) =  NC
+129   continue
 127      continue
 128    continue
 
-129   continue
 
 300   if(allocated(MCG)) deallocate(MCG)
 C This next deallocation caused some x86_64 to crash (wierd)
