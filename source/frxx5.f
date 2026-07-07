@@ -723,7 +723,7 @@ C                   E DIFFERENCE = ERANGE
       ENDIF ! EIGEN
 
       if(nlag>0)then  ! Lagrange mesh, eigen or bin
-	 write(900,*) '&'
+	 write(900,*) '/'
 	 close(900)
        call system('pluto < pluto.'//CHME//'pin > pluto.'//CHME//'pout')
 	 Adj='PL'
