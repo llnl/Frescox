@@ -41,8 +41,8 @@ NAG = nagstub.$(O)
 BLAS = lapack.$(O) 
 #LBLAS = -llapack -lblas -lg2c -lm
 
-FFLAGS = -O2
-FFLAGS1 = -O1 
+FFLAGS = -O2 
+FLAGS1 = -O1 
 # FFLAGS = -g -O2
 # FFLAGS1 = -g -O1
 LFLAGS  =  
