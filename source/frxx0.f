@@ -2117,6 +2117,13 @@ c        kind = 3 & 4 :    s.p. inelastic form factors of multipole 'ik'
      X       ' is energy shift up for dataset ',2i3,' >> IGNORED')
           srch_value(ip) = dataEshift; srch_datanorm(:,ip) = dataset(:)
           srch_damp(ip) = damp;        srch_B(ip) = B
+     
+         else if(kind==7) then ! R-matrix damping
+          write(koe,10183) ip,name,term,jtot,psign(par+2),nopot
+10183     format('   Variable',i4,'=',a10,' is damping of R-matrix term'
+     X       ,i4,' at J/pi =',f5.1,a1,' [NoPot=',L1,']')
+          srch_value(ip) = damp; srch_rterm(ip) = term
+
         endif
 
          if(abs(srch_value(ip)-nul)>.001) then

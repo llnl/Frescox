@@ -1299,6 +1299,7 @@ C
         go to 15
 11      LOP = -1
         DER = -1
+        backspace KF
         READ(KF,121,END=50,ERR=11) NP,HNP,RFS,FSCALE,LTR,PTR,TTR,
      x                             IB,IA,COMM
        endif
