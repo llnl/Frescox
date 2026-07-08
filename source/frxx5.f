@@ -49,7 +49,7 @@ C				mp should be defined here the same as in fread
      x           FFC4,BSMAT(NCHBINMAX,NCHBINMAX,max(1,NKMAX),MSP)
       INTEGER QNF(19,MSP),BAND(2,MXP,MXX),NEX(MXP),TR,TNT(4,mp),
      &        PTYPE(12,MLOC),PARITY,POTK,ITC(MXP,MXX),COPY(2,MXP,MXX,2),
-     & 	      NKBIN(2,MSP),NORBIN(MSP)
+     & 	      NKBIN(2,MSP),NORBIN(MSP),PARITC
       REAL*8 D0(MSP,2),JEX(6,MXP,MXX),MASS(4,MXP),WL(20),WLD(20),
      &       J,JN,JNMAX,JNMIN,JCORE,JCOM,KCORE,KCOM,MA,MB,
      &       JNA,JNB,JCOREA,JCOREB,KCOREA,KCOREB,K,QVAL(MXP),RMAS(MSP)
@@ -193,6 +193,7 @@ C
      &  '  Z  Mass   K     Norm    rms      D0     D   ANC/Gsp')
 
       DO 900 KNP=1,10000
+       LMAX = -1
 !      READ(KI,852) KN1,KN2,IC1,IC2,INI,KIND,CH1,NN,L,LMAX,SN,IAK,J,IB,
 !     &         KBPOT,KRPOT,E,ISC,IPC,NFL,NAM,AMPL
 	KN1=0;IC1=0;IC2=0;IN=0; BE=0.; IA=0;BE=0.0;IA=0;NK=0
@@ -542,9 +543,10 @@ C                               i=3 is the reference potl & i=4 is the effective
 40     CONTINUE
 
 	 IF(MOD(KIND,2).NE.1)  then  ! provide JCOM and PARITY in uncoupled cases
-	   PARITY= (-1)** QNF(9,KN1) !  else keep spatial parity
+	   PARITY= (-1)** QNF(9,KN1) * BAND(IN,ICR,1)! composite parity = core*(-1)**L
 	   JCOM = QNF(11,KN1)*0.5       ! just l+s=j
 	   endif
+         PARITC =  BAND(IN,ICP,IB)
 C-------------------------------------------------------------------
 	rlb = EIGEN 
 	cmb = .not.rlb
@@ -591,16 +593,20 @@ C-------------------------------------------------------------------
 402	  continue
 	IA = IAMIN ! guess
 	 NA = IAMAX-IAMIN+1
+         PARITC =  BAND(IN,ICP,IB)
+
 	 write(900,403)  'particle', DM,abs(DZ),SN,
      x           NAME(IN,ICR),MASS(IN,ICR),ZC,abs(NFL),
      X           NA,(JEX(IN,ICR,IA),IA=IAMIN,IAMAX) 
 	 write(900,4034) (ENEX(IN,ICR,IA),IA=IAMIN,IAMAX)
+	 write(900,4035) (BAND(IN,ICR,IA),IA=IAMIN,IAMAX)
 403	 format('  name1=''',a8,'''  mass1=',f8.4,' z1=',f8.3,
      x           ' spin1=',f5.1,/
      x           '  name2=''',a8,'''  mass2=',f8.4,' z2=',f8.3,/
      x           '  nbin =',i4/
      x           '  ncore=',i1,' icore=',5f9.1)
 4034     format( '        ',1x,'encore=',5f9.5)
+4035     format( '        ',1x,'pcore =',4x,5i5)
  	 write(900,404) nlag,0,isc,cmb,iame
 404	 format('  nlag=',i3,' njt=',i2,'  plot(:)=0, bin=',i3,
      x          ' nearest=T complexbin=',L1,' bloch=T iame=',i4)
@@ -631,13 +637,15 @@ C                                              **** BOUND STATES
 	 if(VPOT) then ! vary potential for E
 	 isearch=2
 	 if(NA>1) isearch=3  ! vary deformed potential, not original WS
-	 write(900,4051) isearch,1,NN,-E,IL,JCOM,JCOM,PARITY,PARITY,NN
+	 write(900,4051) isearch,1,NN,-E,IL,JCOM,JCOM,PARITC,PARITC,NN
 4051	 format('  search=',i2,' sjt=',i1,' enodes=',i2,
      x     ' eigen=',f10.6,' echan =',i2,
      x     '  jtot=',2f6.1,' parity=',2i3,' pnodes=',i2)
+	 write(900,4052) LMAX
+4052     format('  pwmax=',i3)
 
 	  else         ! find E in fixed potential  (ignore input E)
- 	 write(900,4057) NN,IL,-E,JCOM,PARITY
+ 	 write(900,4057) NN,IL,-E,JCOM,PARITC
 4057	 format('   pnodes =',i3,' echan =',i2,' eigen=',f10.6,
      x          ' jtot=',f6.1,' parity=',i2,' emaxlist = 0')
 	 endif
@@ -701,7 +709,7 @@ C                   E DIFFERENCE = ERANGE
 	if(VPOT) then 				! vary potential to phase
 	 isearch=2
 	 write(900,406) isearch,1,NN,IL,-E,phase,autowid,
-     x                  JCOM,JCOM,PARITY,PARITY
+     x                  JCOM,JCOM,PARITC,PARITC
 406	 format('  search=',i2,' sjt=',i1,' enodes=',i2,' echan =',i2,
      x     ' eigen=',f10.6,' bloch=T phase=',f6.2,' autowid=',f9.3,/,
      x     '  jtot=',2f6.1,' parity=',2i3)
@@ -710,6 +718,7 @@ C                   E DIFFERENCE = ERANGE
 	 write(900,407) JCOM,PARITY,1,IL
 407	format('  jtot=',f6.1,' parity=',i3,' plot(4)=',i1,' echan=',i3)
         endif ! VPOT
+	 write(900,4052) LMAX
 
 	 ex = 0.0
 	 KN = KN1+IL-1
