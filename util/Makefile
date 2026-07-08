@@ -25,3 +25,4 @@
 #
 #***********************************************************************
 FC=gfortran -Wall -std=legacy
+FFLAGS =  -fcheck=all   # debug

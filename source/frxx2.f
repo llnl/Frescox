@@ -45,10 +45,10 @@
       REAL*8 RL(MMX*N),P(0:12),DEF(0:12),CCPT(2),MEK(MPAIR),AI(4),
      x       IM(MMX*N),FORMDEF(12,MLOC)
       LOGICAL PT(2),WRIT25,itt,LDEPP,HASO(KPMAX),STOP19,nosub,DUPOT,SHNG
-     x       ,lanecoup
-      INTEGER KPOP(KPMAX)
+     x       ,lanecoup,nouse
+      INTEGER KPOP(KPMAX),FIRSTDEF,LASTDEF,TAU,FILTER(3)
       INTEGER PTYPE(12,MLOC),SHAPE,SHAPEI,TRENEG,TYPE,TYPEI,LOC(0:7),
-     X        MATRIX(6,MPAIR), NEX(MXP),CPOT(MXP,MXX),COPY(2,MXP,MXX),
+     X        MATRIX(9,MPAIR), NEX(MXP),CPOT(MXP,MXX),COPY(2,MXP,MXX),
      X        LAMBDA(MLOC),NCHPMAX(MXP),KKA,LSHAPE(MLOC),LDEP(MLOC)
       EQUIVALENCE (P1,DEF(1)),(P2,DEF(2)),(P3,DEF(3)),(P4,DEF(4)),
      &            (P5,DEF(5)),(P6,DEF(6)),(P0,DEF(7)),(P,DEF)
@@ -65,7 +65,7 @@
      X       	'Spin.spin','1-EffMass',
      X          'Proj. defrm','Target defm','Proj. table','Targ. table',
      X          'Proj.2order','Targ.2order',
-     X       	'Mut.2order','All-orders',2*'UNDEFINED',
+     X       	'Mut.2order','All-orders','Thomas S.O.','UNDEFINED',
      X          'NN: SSC(C)','NN: User"s',2*'UNDEFINED',
      x          'LaneVl diag','LaneDr diag','LaneVl coup','LaneDr coup',
      x          2*'UNDEFINED','L(L+1) Vol '/
@@ -78,7 +78,7 @@
      X      METYPE / 'Coulomb', 'Nuclear' /
 	integer line(mvars)
 	namelist/potl/ kpi,typei,itt,nosub,shapei,p,LSHAPEI,XLVARY,
-     x        ALVARY,JL,datafile
+     x        ALVARY,JL,datafile,nouse
 	namelist/step/ib,ia,k,str
 C
 C  READ(I3,I2,A1,I2,7F8.4) KP,TYPE,IT,SHAPE,P1,P2,P3,P4,P5,P6,P7
@@ -106,6 +106,7 @@ C   15  SHAPE  Def1  Def2  Def3  Def4  Def5  Def6,Def0 Target 2-order table
 C   16  SHAPE  Def1  Def2  Def3  Def4  Def5  Def6,Def0 Mutual second-order
 C   17                                              Proj-target all-order matrix
 C               (Inelastic monopole = Def0) 
+C   18         P1    P2                      Thomas projectile spin-orbit from previous TYPE 1,2,11 or 13
 C
 C   20  MAX#    Super-soft core of de Tourreil & Sprung (SSC (C))
 C   21  MAX#    User-supplied N-N potential via subroutine NNPOT
@@ -179,10 +180,14 @@ C             4      =  L   :  JF number of undeformed potential shape
 C                                  (if -1, ignore this JF)
 C             5      =  ITYP:  TYPE of original JF form, for TYPE ge 10 and TYPE<22
 C                       SHAPE: file to read L-dep shapes for TYPE lt 10
-C             6      =  0,1 :  1 to force potential to be iterated.
-C             7      =  0-2 :  1 for DERIVATIVE in R
+C             6      =  -1,0,1 :  1 to force potential to be iterated
+C                                -1 for the potential to ignored everywhere
+C             7      =  TAU for deformed projectile spin-orbit after Thomas
+C                       1 for normal potl derivative, 2s for wf derivative, 3 for V/(r*r)
+C                       Note: this is inverted order for TAU in MULTIP routine
+C             8      =  0-2 :  1 for DERIVATIVE in R
 C                              2 for L/R term matched to a derivative form
-C             8    unused
+C             9-12    unused
 C
 C   for IX=1,NIX the array MATRIX(i,IX) has info about matrix elements:
 C
@@ -230,6 +235,8 @@ C     NIX = 1
 	datafile = ' '
         SHNG = .False.
 	line(:) = 0
+       FIRSTDEF = 0  
+       LASTDEF = 0
 10    continue
 !	READ(KI,12) KPI,TYPEI,itt,SHAPEI,(DEF(K),K=1,7)
 	kpi=0; typei=0; itt=.false.;shapei=0; def(:)=0; nosub=.false.
@@ -241,6 +248,7 @@ C     NIX = 1
 	 cit = '2'
 	 if(itt) cit = '3'
 	endif
+	if(nouse) cit = '#'
 	LDEPP = SHAPEI>=30 .and. SHAPEI<40
 	if(LDEPP)  SHAPEI = SHAPEI-30
 	if(LDEPP.and..not.(JL.eq.'J' .or. JL.eq.'L')) JL='J'
@@ -334,8 +342,9 @@ C                        remove next line when Coul quadrature written.
             PTYPE(4,NF) = NFD
             PTYPE(5,NF) = ITYP
             PTYPE(6,NF) = 0
-            IF(itt) PTYPE(6,NF) = 1
+            IF(itt)   PTYPE(6,NF) = 1
             IF(nosub) PTYPE(6,NF) = PTYPE(6,NF)+2
+            if(nouse) PTYPE(6,NF) =-1
                IF(K.EQ.0) PTYPE(4,NFD) = -NF
             PTYPE(7,NF) = 0
             PTYPE(8:12,NF) = 0
@@ -347,6 +356,7 @@ C                        remove next line when Coul quadrature written.
 	      VARYL(1,NF) = XLVARY
 	      VARYL(2,NF) = ALVARY
 13        CONTINUE
+
        FORMDEF(1:12,NF) = DEF(1:12)
        IF(ITYP.GT.0) THEN
          WRITE(KO,175) KP,TYPE,WHO(TYPE+1),cit,SHAPE,SHP(SHAPE+1),MF,
@@ -417,7 +427,7 @@ C
 	    KK=K
 	    if(K==7) KK=0
 !		write(6,*) ' @@ look at M =',M,' with K,KK,T= ',K,KK,TYPE
-         IF(K.EQ.0) THEN
+        IF(K.EQ.0) THEN
             WRITE(KO,171) M,KK
         ELSE IF(ITYP.GT.0 .AND. TYPE.LE.11) THEN
 C                  plain nuclear deformations
@@ -426,9 +436,8 @@ C                  plain nuclear deformations
      &         WRITE(KO,1715) PTNAME(I),DEF(K)/R,R
         ELSE IF(ITYP.eq.0 .AND. TYPE.LE.11.and..TRUE.) THEN
 C                Coul deformations using Mn(Ek)
-!      DO 1400 IC=1,NCHAN
-	 IC = ICK
-	 IF(IC.eq.0) GO TO 1400
+	  IC = ICK
+	  IF(IC.eq.0) GO TO 1400
          IF(CPOT(IC,1).NE.KP) GO TO 1400
          Z1Z2 = MASS(2+I,IC)
            BETA = DEF(K) * 4 * PI/(3 * RR **KK * Z1Z2)
@@ -574,6 +583,7 @@ C					Read in couplings as deformation lengths
             PTYPE(6,JF) = 0
             IF(itt) PTYPE(6,JF) = 1
             IF(nosub) PTYPE(6,JF) = PTYPE(6,JF)+2
+            if(nouse) PTYPE(6,NF) =-1
             PTYPE(7,JF) = 0
             PTYPE(8:12,JF) = 0
 	      LDEP(JF) = 0
@@ -586,6 +596,53 @@ C					Read in couplings as deformation lengths
 C					The monopole is replaced completely!
                PTYPE(4,NFD) = -NF
         GO TO 190
+
+      ELSE IF(TYPE==18) THEN
+         WRITE(KO,179) KP,TYPE,WHO(TYPE+1),cit,'Thomas     ',MF,
+     X             (DEF(K),K=1,2)    
+
+       FILTER = (/ 0, 0, 0/)
+C      write(6,*) 'TAU filter',FILTER
+         do NFDEF=FIRSTDEF,LASTDEF   ! new spin-orbit forms
+              ITYP = PTYPE(2,NFDEF)
+              KK = PTYPE(3,NFDEF)
+              K = KK; if(KK==7) K=0
+            do TAU=1,3              ! KSO=1: normal derivative. 2: wf deriv, 3: V/r^2
+              if (FILTER(TAU)==1) cycle
+              NF = NF+1
+              CALL CHECK(NF,MLOC,24)
+              HPOT(NF) = H
+
+              PTYPE(1,NF) = PTYPE(1,NFDEF)  ! KP number of source
+              PTYPE(2,NF) = TYPE
+              PTYPE(3,NF) = KK
+              PTYPE(4,NF) = NFDEF
+              if (ITYP>=10) then  ! deformations source
+                 PTYPE(5,NF) = PTYPE(5,NFDEF) ! TYPE of what was deformed.
+              else   ! scalar source
+                 PTYPE(5,NF) = ITYP
+              endif
+              PTYPE(6,NF) = 0
+              IF(itt)   PTYPE(6,NF) = 1
+              if(nouse) PTYPE(6,NF) =-1
+              PTYPE(7,NF) = TAU
+              PTYPE(8:12,NF) = 0
+              if (TAU==2) PTYPE(8,NF) = 1   ! derivative operator
+
+       write(KO,1711) NF,K,TAU,NFDEF,ITYP,PTYPE(5,NFDEF),PTYPE(5,NF)
+1711  FORMAT(14X,'At ',I4,' is k =',I3,
+     x       ' tau =',I2,' from',I3,' type',I3,' now',2i3)
+C        write(KO,*) 'PTYPE(:8,',NF,')=',PTYPE(1:8,NF)
+C        write(KO,*) 'PTYPE(:8,',NFD,')=',PTYPE(1:8,NFD)
+         I = PTYPE(5,NF)
+         if(I<1 .or. I>2) then
+           write(6,*) 'TYPE 18 only uses central potentials, not',I
+           stop
+           endif
+
+         enddo
+         enddo
+        go to 195
 
       ELSE IF(TYPE==20 .OR. TYPE==21) THEN
          SHAPE = MAX(1,MIN(12,SHAPE))
@@ -650,10 +707,13 @@ C
 178   FORMAT(/40X,'  KP1  @ E1     KP2  @ E2     ',
      &	'KP3  @ E3 ....'      
      &  /1X,I4,I5,'=',A11,1X,A1,I2,'=',A11,I3,6(f4.0,f10.4))
+179   FORMAT(/41X,'    P2        P2',
+     &  /1X,I4,I5,'=',A11,1X,A1,2x,' ',A11,I3,2F10.4/)
 C
       IF(TYPE.EQ.0) THEN
       SHPNAM = 'CHARGE (WS)'
       if(SHAPE>=7) SHPNAM = SHP(SHAPE+1)
+
       if(final) then
       WRITE(KO,172) ICK,KP,TYPE,WHO(1),0,SHPNAM,NF,(DEF(K),K=1,7),A,H
       else
@@ -713,7 +773,7 @@ C                   these coulomb forms to be multiplied by z1*z2 later
      X         (DEF(K),K=1,J)
 	 if(J==0) write(6,*) ' *** MISSING POTENTIAL INDICES ***'
 !	endif  ! SHAPE /= 45
-      else
+      else if(TYPE /= 18) then
       WRITE(KO,17) KP,TYPE,WHO(TYPE+1),cit,SHAPE,SHPNAM,NF,
      X         (DEF(K),K=1,7),A
  	endif  ! SHAPE /= 45
@@ -734,6 +794,7 @@ C
       PTYPE(8:12,NF) = 0
         IF(itt) PTYPE(6,NF) = 1
         IF(nosub) PTYPE(6,NF) = PTYPE(6,NF)+2
+        if(nouse) PTYPE(6,NF) =-1
 	      LDEP(NF) = 0
 	      if(JL.eq.'J') LDEP(NF) = 1
 	      if(JL.eq.'L') LDEP(NF) = 2
@@ -741,6 +802,7 @@ C
 	  VARYL(1,NF) = XLVARY
 	  VARYL(2,NF) = ALVARY
 19    CONTINUE
+
 195   IF(SHAPE.GE.7.AND.SHAPE.LE.9) GO TO 70
          IF(TYPE.EQ.0) THEN
             RR = P3 * CC
@@ -761,7 +823,7 @@ C                          select type of tensor, derivative & rl/im
       GO TO (199,20,25,30,30,35,35,35,20,20,50,50,50,50,
 C            0   1  2  3  4  5  6  7  8  9  10 11 12 13,
 
-     X      55,55,55,65,65,65,40,47,65,65,20,25,20,25, ! TYPE+1
+     X      55,55,55,65,57,65,40,47,65,65,20,25,20,25, ! TYPE+1
 C           14,15,16,17,18,19,20,21,22,23,24,25,26,27  ! = type
 
      X      55,55,20),TYPE+1
@@ -805,11 +867,18 @@ C                                deform previous potential :
          CALL DEFORM(DEF,FORMF,NFD,MF,NF, MAXM,MLOC,PTYPE,N,H,RR,
      &               SHAPE.GE.11,SHAPE.le.12,COULCN,STREN,LAMBDA)
          GO TO 100
+
 55    IF(SHAPE<=9) GO TO 70
 C                                second derivative of previous potential :
          CALL DDEFORM(DEF,FORMF,NFD,MF,NF, MAXM,MLOC,PTYPE,N,H,
      &               COULCN,STREN,LAMBDA)
          GO TO 100
+
+57     continue   !  deformed spin-orbit shapes from multipoles of central potl.
+C        write(KO,*) 'get Thomas so shapes',MF,'to',NF
+         CALL VSODEFORM(DEF,FORMF,NFD,MF,NF, MAXM,MLOC,PTYPE,N,H,CONLS)
+         GO TO 100
+
 C
 60    FORMF(I,NF) = FORMF(I,NF) + V
 65    CONTINUE
@@ -893,8 +962,8 @@ C			Have potential form. Print it out if required:
           DO 115 M=MIN(MF,NF),NF
          IF(ABS(PTYPE(5,M))+PTYPE(3,M).EQ.0.AND.TRENEG.LT.3)GOTO115
 	 if(SHAPE>=40) go to 115
-            WRITE(KO,110) M,PTYPE(3,M)
-110         FORMAT(/' Potential Form at',I4,' (Q=',i2,') is')
+            WRITE(KO,110) M,PTYPE(3,M),PTYPE(7,M)
+110         FORMAT(/'Potential Form at',I4,' (Q=',i2,', TAU=',i2,') is')
             WRITE(KO,120) (RL(I),FORMF(I,M),I=1,MATCH,MR)
 115       CONTINUE
 120         FORMAT(5(1X,F5.1,':',2F9.4,1X))
@@ -920,6 +989,12 @@ C
      X         a1,'-dependent factor of shape=',
      x	       i1,'=',a11,':   X =',f8.4,'  A =',f8.4/)
 	endif
+
+
+       FIRSTDEF = MF  ! for next potential to use if desired.
+       LASTDEF = NF
+       LASTTYPE= TYPE
+
       IF(KPI.GT.0) GO TO 10
 200   NIX = NIX - 1
       IF(IR0.GT.0) WRITE(KO,*) 'FILE 25 needed ',IR0-1,' records'
@@ -928,9 +1003,9 @@ C
 	written(34) = .true.
         DO 81 M=NF1,NF
        if(PTYPE(2,M).ne.17) 
-     x   write(34,79) M,(PTYPE(I,M),I=1,3)
+     x   write(34,79) M,(PTYPE(I,M),I=1,3),(PTYPE(I,M),I=7,8)
 79     format('# Potential at',i4,': KP=',i3,' of type',i3,
-     x			' and multipole =',i3)
+     x	    ' and multipole =',i3, ' TAU=',i1,' DER=',i1)
          DO I=1,N
          write(34,'(f8.3,1p,2e15.6)') (I-1)*H,FORMF(I,M)
 	 enddo
@@ -940,8 +1015,9 @@ C
         WRITE(89,'(''#'',f8.5)') HCM
         DO M=1,NF
         WRITE(89,'(''#'',4i5,f8.5)') M,MATCH,MR,1
-        WRITE(89,141) (PTYPE(I,M),I=1,3)
-141	format('# Optical potential KP=',i3,': type,multipole =',2i3)
+        WRITE(89,141) (PTYPE(I,M),I=1,3),(PTYPE(I,M),I=7,8)
+141	format('# Optical potential KP=',i3,': type,multipole =',2i3,
+     x         ' TAU=',i1,' DER=',i1)
 	DO 83 I=1,MATCH,MR
 83      WRITE(89,144) RL(I),FORMF(I,M)
 144   FORMAT(1X,F8.3,1p,2g13.5)
@@ -1105,6 +1181,71 @@ C                        zero multipole
 	
       RETURN
       END
+      SUBROUTINE VSODEFORM(DEF,FORMF,NFD,MF,NF, MAXM,MLOC,
+     X                     PTYPE,N,H,CONLS)
+	use io
+      IMPLICIT REAL*8(A-H,O-Z)
+C                               (note that implicit is different here|)
+C
+C       Generate the 3 form factors needed for deformed spin-orbit after Thomas
+C        use simple derivative form-factors
+C
+C         For tau=1 for normal potl derivative, 
+C                 2 for wf derivative, 
+C                 3 for V/(r*r)
+C
+      COMPLEX*16 FORMF(MAXM,MLOC),FDERIV(MAXM),NEWFORM(MAXM),F
+      REAL*8 H,R
+      REAL*8 DEF(0:8)
+      INTEGER PTYPE(12,MLOC),TAU,DER
+      PI = 4. * ATAN(1.0)
+      SQFPI = SQRT(4.*PI)
+      write(KO,*) 'NFD=',NFD
+C 
+
+C                use 2nd derivative of form factor :
+      DO 70 M=MF,NF
+         K = PTYPE(3,M)
+         J = PTYPE(4,M)
+         ITYP = PTYPE(5,M)
+         TAU =  PTYPE(7,M)
+         DER =  PTYPE(8,M)
+         P1 = DEF(1)
+         P2 = DEF(2)
+
+          write(KO,1711) M,K,TAU,DER,J,ITYP,P1,P2
+1711  FORMAT(14X,'At ',I4,' is k =',I3,' tau =',I2,' der =',I2,
+     x       ' from',I3,' type',I3,' scale by',2f8.5)
+       if (TAU==1) then
+       call DERIVC(FORMF(:,J),FDERIV,H,N)
+        do I=2,N 
+           R = (I-1)*H
+           F          = FDERIV(I) / R  * (-CONLS)
+           FORMF(I,M) = cmplx(real(f)*P1, imag(F)*P2)
+        enddo
+
+       else if (TAU==2) then
+        do I=2,N 
+           R = (I-1)*H
+           F          = FORMF(I,J) / R  * (-CONLS)
+           FORMF(I,M) = cmplx(real(f)*P1, imag(F)*P2)
+        enddo
+
+       else  ! TAU==3
+        do I=2,N 
+           R = (I-1)*H
+           F          = FORMF(I,J) * 0.5 / R**2  * (-CONLS)
+           FORMF(I,M) = cmplx(real(f)*P1, imag(F)*P2)
+      enddo
+
+       endif
+       FORMF(1,J) = FORMF(2,J)  ! smooth any possible singularity at R=0
+
+70    CONTINUE
+	
+      RETURN
+      END
+
       FUNCTION CURVE(SHAPE,DERIV,R,RH,A)
       IMPLICIT REAL*8 (A-H,O-Z)
       PARAMETER (EXPMAX = 75.0)

@@ -31,19 +31,20 @@
 \contentsline {subsubsection}{\numberline {3.5.3}Namelist \&TWONT}{27}{}%
 \contentsline {paragraph}{For KIND = 6:}{28}{}%
 \contentsline {subsection}{\numberline {3.6}\&COUPLING namelists}{28}{}%
-\contentsline {paragraph}{For KIND = 1:}{29}{}%
-\contentsline {paragraph}{For KIND = 2:}{30}{}%
-\contentsline {paragraph}{For KIND = 3 or 4:}{31}{}%
-\contentsline {paragraph}{For KIND = 5 or 6:}{31}{}%
-\contentsline {paragraph}{For KIND = 7:}{32}{}%
-\contentsline {paragraph}{For KIND = 8:}{32}{}%
-\contentsline {paragraph}{For KIND = 9:}{33}{}%
-\contentsline {paragraph}{For KIND = 11:}{34}{}%
-\contentsline {subsubsection}{\numberline {3.6.1}\&CFP namelists}{34}{}%
-\contentsline {section}{\numberline {4}Input CDCC format}{36}{}%
-\contentsline {section}{\numberline {5}Input SFRESCOX format}{39}{}%
-\contentsline {subsection}{\numberline {5.1}Search file}{39}{}%
-\contentsline {subsection}{\numberline {5.2}Sfrescox commands}{42}{}%
-\contentsline {section}{\numberline {6}Test run: a CCBA calculation}{45}{}%
-\contentsline {section}{\numberline {7}File allocations}{46}{}%
-\contentsline {section}{\numberline {8}KIND=1 Spin Transfer Couplings}{48}{}%
+\contentsline {paragraph}{For KIND = 0}{29}{}%
+\contentsline {paragraph}{For KIND = 1:}{30}{}%
+\contentsline {paragraph}{For KIND = 2:}{32}{}%
+\contentsline {paragraph}{For KIND = 3 or 4:}{32}{}%
+\contentsline {paragraph}{For KIND = 5 or 6:}{33}{}%
+\contentsline {paragraph}{For KIND = 7:}{33}{}%
+\contentsline {paragraph}{For KIND = 8:}{34}{}%
+\contentsline {paragraph}{For KIND = 9:}{34}{}%
+\contentsline {paragraph}{For KIND = 11:}{35}{}%
+\contentsline {subsubsection}{\numberline {3.6.1}\&CFP namelists}{35}{}%
+\contentsline {section}{\numberline {4}Input CDCC format}{37}{}%
+\contentsline {section}{\numberline {5}Input SFRESCOX format}{40}{}%
+\contentsline {subsection}{\numberline {5.1}Search file}{40}{}%
+\contentsline {subsection}{\numberline {5.2}Sfrescox commands}{43}{}%
+\contentsline {section}{\numberline {6}Test run: a CCBA calculation}{46}{}%
+\contentsline {section}{\numberline {7}File allocations}{47}{}%
+\contentsline {section}{\numberline {8}KIND=1 Spin Transfer Couplings}{49}{}%

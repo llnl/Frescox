@@ -102,7 +102,7 @@
         real*8 jjbord(8),expand(11),expandi(11)
 	logical bigj,used(2,ma),fail3,frac,uu,nml,keep,itt,pwf,nosub,
      X	fexch,ignore,trnl,adjq,fail,given,parall,haso(ma),foldso,cdc,
-     x  complexbins,pr,gamma,readvar
+     x  complexbins,pr,gamma,readvar,nouse
 	namelist/fresco/hcm,rmatch,rintp,hnl,rnl,centre,hnn,
      X   rnn,rmin,rsp, rasym,accrcy,switch,ajswtch, sinjmax,plane,
 !@     X   gailitis,gailacc,
@@ -127,8 +127,8 @@
      X		 p,p0,p1,p2,p3,p4,p5,p6,p7,v,r0,rv,vr0,a,av,
      X		 w,wr0,rw,aw,wa,r0w,vso,rso,rso0,aso,vsoi,rsoi,asoi,
      X           wd,wdr,wda,wdr0,awd,defp,deft,vd,vdr,vda,
-     x           lshape,jl,xlvary,alvary,citt,datafile
-	namelist/potl/ kpi,typei,itt,nosub,shapei,p,lshapei,jl,
+     x           lshape,jl,xlvary,alvary,citt,datafile,nouse
+	namelist/potl/ kpi,typei,itt,nosub,nouse,shapei,p,lshapei,jl,
      x 			xlvary,alvary,datafile
 	namelist/step/ib,ia,k,str
 	namelist/overlap/ kn1,kn2,ic1,ic2,in,kind,ch1,nn,l,lmax,sn,
@@ -1011,6 +1011,7 @@ C     IF(PADE.GE.1) VEFF=0
 	nix = 1
 	pcomps(:) = 0
 	kdepfac = 1
+        lastgroup = 1
 70       if(nml) then
 	  loop=-1
 	  kp=0; type=0; itt=.false.;shape=0; nosub=.false.
@@ -1019,7 +1020,7 @@ C     IF(PADE.GE.1) VEFF=0
 	  w=0;rw=0;aw=0;wd=0;wdr=0;wda=0;vd=0;vdr=0;vda=0
           vso=0;rso=0;aso=0;vsoi=0;rsoi=0;asoi=0
 	  jl=' ';xlvary=0;alvary=0;lshape=0;lshapei=0
-	  datafile=' '
+	  datafile=' '; nouse=.false.
 	 ios=0
          if(trnl) then
           if(iame==0.or.STDINALL)
@@ -1053,6 +1054,7 @@ C     IF(PADE.GE.1) VEFF=0
 	  endif
 	  itt = citt=='1'.or.citt=='3'
 	  nosub=citt=='2'.or.citt=='3'
+          nouse=citt(1:1)=='-'
 	endif
 	kpi = kp
 	typei = type
@@ -1103,12 +1105,17 @@ c			Find partition using this coupling:
         shape = abs(shapei)
 	kp = abs(kpi)
 	if(shape==45) kdepfac = max(kdepfac,2)
+	if(type==18) kdepfac = max(kdepfac,2)
 !	 if(say) write(48,*) ' kdepfac = ',kdepfac
 	haso(kp) = haso(kp).or.(type==3.and.abs(p1)+abs(p4)>1e-9)
  	  if(say) write(48,711) kp,loop,type,haso(kp),p
 711	  format(' kp,loop =',2i3,' is type,so,p(:) =',i4,l2,13g12.4)
 ! 721     format(i3,i2,a1,i2,2f8.4,2f8.2,2f8.1,f8.4)
 
+      if(type==18) then
+         nf = nf + lastgroup*3  ! deformed Vso uses 3 * last group of multipoles
+         lastgroup = 1
+      endif
       if(type.ge.10.and.type.le.16) then
                if(shape.eq.0.or.shape.gt.13) shape = 10
 c                        remove next line when coul quadrature written.
@@ -1122,8 +1129,9 @@ c                        remove next line when coul quadrature written.
                nf= nf + 1
       		if(type.ge.14.and.type.le.16) nf=nf+1
 1290        continue
-	    knused(kp) = knused(kp) + (nf-nf0+1)
-	    pcomps(ick) = pcomps(ick) + (nf-nf0+1)
+            lastgroup = nf-nf0+1
+	    knused(kp) = knused(kp) + lastgroup
+	    pcomps(ick) = pcomps(ick) + lastgroup
 	    
        if(type.lt.12.or.type.ge.18) go to 1350
 1301    if(nml) then
@@ -1418,7 +1426,7 @@ c     	   DM = DM + (QVAL(ICP)-QVAL(ICR))/AMU
 	maxqrn=0 ; maxqrn1=0 ; maxqrn2=0
 	mnpair=0; npair = 0
   110 if(nml) then
-	icto=0;icfrom=0;kind=0;ip1=0;ip2=0;ip3=0;ip4=-1;ip5=-1;infile=4
+	icto=0;icfrom=0;kind=-1;ip1=0;ip2=0;ip3=0;ip4=-1;ip5=-1;infile=4
 	p1=0;p2=0;jmax=0;rmax=0;kfrag=0;kcore=0;qcm=0;lam=0;nforms=0
 
 	 ios=0; nlcouplingend=0
@@ -1603,7 +1611,7 @@ c     	   DM = DM + (QVAL(ICP)-QVAL(ICR))/AMU
 !         write(ko,232) (qscale(i),i=max(0,-qq),abs(qq))
          write(ko,nml=scale) 
 	 endif
-	if(kind==1.and.qq==0) then
+	if( kind==0 .or. (kind==1.and.qq==0) ) then
 	   npair = 30   ! we do not know how much data in file 4!
 	   npair = max(npair,nint(expand(6)*mxx**2))   ! we do not know how much data in file 4!
 	   if(nforms==0) nf = nf+npair
@@ -1792,7 +1800,7 @@ c        kind = 3 & 4 :    s.p. inelastic form factors of multipole 'ik'
           endif
          endif
         endif
-	if(nq==0.and.kind/=1.and.kind/=9) then
+	if(nq==0.and.kind>1.and.kind/=9) then
 	  write(koe,*) ' Missing fractional overlaps! for coupling ',cp
 	  if(kind/=4.and.kind/=2.and.kind/=5.and.kind/=9) 
      x              write(koe,*) ' Projectile uses:',used(1,1:msp)

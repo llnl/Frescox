@@ -25,9 +25,9 @@
 #
 #***********************************************************************
 ####            gfortran 
-FC = gfortran -Wall
+FC = gfortran -Wall 
 F90C = $(FC)
-FORM =  -w  -cpp
+FORM =  -w  -cpp -std=legacy
 PARALLEL = frxx15
 BINSI = frxx4.$(O) frxx7a.$(O)
 BINS = frxx0.$(O) $(BINSI)

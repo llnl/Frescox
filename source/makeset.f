@@ -249,8 +249,7 @@ C    --------------------------------------------------------------
 !	EPS=-1		! DEBUG ONLY
       ICH = 0
            IF(LISTCC.GE.1) WRITE(48,*) JTOTAL,PSIGN(PARITY+2)
-!           WRITE(480,*) 
-!           WRITE(480,*) ENLAB,JTOTAL,PSIGN(PARITY+2)
+
       DO 325 IC=1,MXP
 	NEXK = NCHPART(IC)
 	ETATG = (MASS(2,IC)-2*MASS(4,IC))/MASS(2,IC)
@@ -265,6 +264,7 @@ C    --------------------------------------------------------------
 
 	   if(J40P) then
 	   do JF=1,NF0
+           if (PTYPE(6,JF)<0) cycle
 	   if (PTYPE(1,JF)==KPA) then
 	   if (PTYPE(5,JF)==40) then
 	     IB = IPARIT-1			! 1 for IPARIT=1 (+), 2 for IPARIT=3 (-1) as PARITY=(-1)**IPARIT
@@ -341,6 +341,8 @@ C    --------------------------------------------------------------
 
 	   if(J40P) then
 	   do JF=1,NF0
+ 	   IF(LISTCC.GE.4) WRITE(KO,*) C,'@@',JF,':',(PTYPE(II,JF),II=1,8)
+           if (PTYPE(6,JF)<0) cycle
 	   if (PTYPE(1,JF)==KPB) then
 !	   IF(LISTCC.GE.0) WRITE(KO,*) C,'@@',JF,':',(PTYPE(II,JF),II=1,6)
 	   if (PTYPE(5,JF)==40) then
@@ -403,8 +405,10 @@ C    --------------------------------------------------------------
 !					 This feature is required for the E-dependent linear interpolation
 
          DO 300 JF=1,NF0
-!       IF(LISTCC.GE.4) WRITE(KO,*) C,C2,'@@@',JF,':',
-!    x   		(PTYPE(II,JF),II=1,6),',',KPA,KPB
+ 	   IF(LISTCC.GE.4) WRITE(KO,*) C,'@@',JF,':',(PTYPE(II,JF),II=1,8)
+           if (PTYPE(6,JF)<0) cycle
+        IF(LISTCC.GE.4) WRITE(KO,*) C,C2,'@@',JF,':',
+     x   		(PTYPE(II,JF),II=1,8),',',KPA,KPB
             IF(PTYPE(3,JF).LT.0 .OR. PTYPE(4,JF).LT.0)    GO TO 300
 
            OP = .true.
@@ -449,6 +453,7 @@ C    --------------------------------------------------------------
             JFT = PTYPE(2,JF)
 	    JFTT = JFT
 	    NFD = PTYPE(4,JF)
+C       IF(LISTCC.GE.1) WRITE(KO,*) 'Try 1',JF,':',JFT,'K=',PTYPE(3,JF)
 !       IF(LISTCC.GE.5) WRITE(KO,*) 'Try 1 form @',JF,':',JFT
 	   SCALEL = 1d0
 	   if(LDEP(JF)>0) then
@@ -467,9 +472,10 @@ C    --------------------------------------------------------------
      X		': LDEP,VARY,T,RH,EE,SCALEL=',
      X             LDEP(JF),VARYL(1:2,JF),T,RH,EE,SCALEL
 	   endif
-      IF(EXCIT(C,3)/=EXCIT(C2,3) .AND.(JFT==10.OR.JFT==12.OR.JFT==14)
+
+      IF(EXCIT(C,3)/=EXCIT(C2,3) .AND.(JFT==10.OR.JFT==12.OR.JFT==14)  ! target transition
      X .OR.
-     X   EXCIT(C,2)/=EXCIT(C2,2) .AND.(JFT==11.OR.JFT==13))
+     X   EXCIT(C,2)/=EXCIT(C2,2) .AND.(JFT==11.OR.JFT==13))  ! projectile transition
      X  GO TO 300
 C**********************************************************************
       IF(JFT.GE.10 .AND. JFT.LE.15 .AND.
@@ -543,13 +549,18 @@ C                           LOOK UP TABLE OF ALLOWED COUPLINGS :
 	endif
          JF0 = JF
 	 repeat = .true.
+       ELSE IF(JFT.EQ.18) THEN
+	 if(KK==7) KK=0
        ENDIF
+
+C       IF(LISTCC.GE.1) WRITE(KO,*) 'Try 5 K,C,C2,JTs',KK,C,C2,
+C    x                          JTARG(C),JTARG(C2)
 C
           S =  TENSOR(JFTT,LVAL(C),JPROJ(C),JVAL(C),JTARG(C),
      X                JTOTAL,LVAL(C2),JPROJ(C2),JVAL(C2),JTARG(C2),
      X                KK,JEX(3,IC,IA),JEX(4,IC,IA),
      X                 JEX(3,IC,IB),JEX(4,IC,IB),
-     X           MASS(3,IC),MASS(4,IC),PTYPE(5,JF),ETAS)
+     X           MASS(3,IC),MASS(4,IC),PTYPE(5,JF),PTYPE(7,JF),ETAS)
 	  S = S
 C    X      * CI**NINT(JPROJ(C2)+JTARG(C2) - JPROJ(C) - JTARG(C))
      X      * CI**NINT( - ABS(JPROJ(C2)-JPROJ(C))
@@ -558,7 +569,7 @@ C    X      * CI**NINT(JPROJ(C2)+JTARG(C2) - JPROJ(C) - JTARG(C))
      X                   +     JTARG(C2)-JTARG(C))
 C           The above phase factors with JPROJ & JTARG etc.,
 C           are there only because of definition of M(Ek) matrix element
-!	if(JFT<=11.or.JFT>=18) 
+
 	if(JFT/=17) S = S * CI**(LVAL(C2)-LVAL(C)) * SCALEL *  WPOT
 	if(repeat.and.JFT==17) then
 C					Use couplings as deformation lengths
@@ -583,8 +594,8 @@ C					Use couplings as deformation lengths
 	   NCLIST(C,C2) =  NC
            IF(C.NE.C2.AND.S*T.NE.0.0) ICH = MAX(ICH,C2)
            IF(LISTCC.GT.1) WRITE(KO,1330) C,C2,JF,
-     X    (PTYPE(II,JF),II=1,6),KK,LDEP(JF),NC,T,S,SCALEL,WPOT
- 1330      FORMAT(' For',I5,' from',I5,' by form',I5,' (',6I3,')',2i3,
+     X    (PTYPE(II,JF),II=1,8),KK,LDEP(JF),NC,T,S,SCALEL,WPOT
+ 1330      FORMAT(' For',I5,' from',I5,' by form',I5,' (',8I3,')',2i3,
      X	    i10,' get',F8.4,2F15.6,3F8.4)
 	 endif
   300    CONTINUE
@@ -825,7 +836,7 @@ C						Put in phase factors:
      X                JTOTAL,LVAL(C2),JPROJ(C2),JVAL(C2),JTARG(C2),
      X                KK,JEX(3,IC1,IA),JEX(4,IC1,IA),
      X                 JEX(3,IC2,IB),JEX(4,IC2,IB),
-     X          MASS(3,IC1),MASS(4,IC1),PTYPE(5,JF),T)
+     X          MASS(3,IC1),MASS(4,IC1),PTYPE(5,JF),PTYPE(7,JF),T)
           S = S * CI**NINT( - ABS(JPROJ(C2)-JPROJ(C))
      X                   +     JPROJ(C2)-JPROJ(C)
      X                   - ABS(JTARG(C2)-JTARG(C))
@@ -872,7 +883,7 @@ C    ---------------------------------------------------
 	    IF(JTMIN.LT.Z .AND. JTOTAL.LE.-JTMIN-.1) GO TO 290
          IC1 = ICTO(CP)
          IC2 = ICFROM(CP)
-            IN1 = MOD(ABS(KIND(CP))-1,2)+1
+            IN1 = max(MOD(ABS(KIND(CP))-1,2)+1 , 1)
          IF(LISTCC.GT.2) WRITE(KO,1329) CP,ICTO(CP),ICFROM(CP),KIND(CP)
      x                  ,NLL(CP),NLN
  1329  FORMAT(/' Coupling #',I4,' to',I4,' from',I4,' of KIND=',i2,2i4)
@@ -965,11 +976,11 @@ C      IF(I.GT.0) STOP 'COULOMB MONOPOLES'
      x                PART(C1,1),EXCIT(C1,1)
       DO 215 C2=1,NCH
       IN = NCLIST(C1,C2)
-      write(89,211) C1,C2,IN
+      write(89,211) C1,C2,IN,EXCIT(C1,1),EXCIT(C2,1)
 	do I=1,IN
 	write(89,213) NFLIST(C1,C2,I),CLIST(C1,C2,I)
 	enddo
-211	format('#',4i5)
+211	format('#',5i5)
 212	format('##',i4,' LJ:',i5,3f6.1,2i4)
 213	format('#',i5,1p,2e14.6)
 215   continue

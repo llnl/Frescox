@@ -32,7 +32,7 @@
 \textheight 22.0cm \textwidth 17.00cm
 %
 \title{\Huge Fresco}
-\date{Version FRESCOX.7, June 2020\\ LLNL-CODE-811517 }
+\date{Version FRESCOX.7.3, Oct 2025\\ LLNL-CODE-811517 }
 \author{I.J. Thompson
 %
 \\Nuclear Theory and Modeling Group
@@ -1001,7 +1001,6 @@ Card 10:  I3,I2,  A1,I2,     3F8.4,      3F8.4,       F8.4
 \hspace*{5mm} \= \hspace*{1cm} \= \hspace*{2cm} \=
 \\
  for\>TYPE\\
-\>9\>SHAPE\>Effective mass: reduction from unity\\
 \>0\> \>Coulomb potential (see Card 9 above)\\
 \>1\>SHAPE\>Central potential, Volume\\
 \>2\>SHAPE\>Central potential, Derivative (i.e. surface)\\
@@ -1012,6 +1011,7 @@ Card 10:  I3,I2,  A1,I2,     3F8.4,      3F8.4,       F8.4
 \>7\>SHAPE\>Tensor force between L and combined projectile+target spins
 (e.g.~n-p tensor force)\\
 \>8\>SHAPE\>Spin.spin force for target \& projectile spins\\
+\>9\>SHAPE\>Effective mass: reduction from unity\\
 \>10\>SHAPE\>Deformed projectile   (matrix elements from ROTOR)\\
 \>11\>SHAPE\>Deformed target       (matrix elements from ROTOR)\\
 \>12\>SHAPE\>Projectile coupled by matrix elements read in.\\
@@ -1020,6 +1020,7 @@ Card 10:  I3,I2,  A1,I2,     3F8.4,      3F8.4,       F8.4
 \>15\>SHAPE\>Target second-order coupled by matrix elements read in.\\
 \>16\>SHAPE\>Target \& projectile simultaneous second-order coupled by matrix elements read in.\\
 \>17\>     \>Target \& projectile all-order coupled by matrix elements read in.\\
+\>18\>     \>Generate deformed spin-orbit forces from preceding TYPE=11 target deformations.\\
 \>20\>NUM\>Super-soft N-N potl. of de Tourreil \& Sprung (SSC(C))\\
 \>21\>NUM\>User-supplied N-N potential via subroutine NNPOT.\\
 \>0\> -\>Coulomb potential : see Card 9.
@@ -1030,8 +1031,9 @@ Card 10:  I3,I2,  A1,I2,     3F8.4,      3F8.4,       F8.4
       TYPE indicates type of spin tensor or excitation coupling,
 \\  IT is `1' or `3' to make this component included only iteratively,\\
  \hspace*{8mm} `2' or `3' to NOT subtract this component in KIND=3,4 single-particle
- couplings,
-\\  the SHAPE indicates the radial shape of the form factor,
+ couplings,\\
+ \hspace*{8mm} `-' or `3' to NOT use this form to couple channels (only  to make other forms, e.g. deformations).
+ \\  the SHAPE indicates the radial shape of the form factor,
 \\  and P1-P3 \& P4-P6 are parameters for the real and imaginary
 parts (respectively).
 
@@ -1394,11 +1396,18 @@ can reference any combination of projectile and target states,
 but k$>$0 for projectile and k$<$0 for target states.
 STR refers to the RDEF(k) measure above;
 the factor  $(-1)^{ [I-I'+|I-I'|]/2}$ must be included.
-The SHAPE and P0-P6 parameters on the TYPE=17 card 10 are not used.
+The SHAPE and P0-P6 parameters on the TYPE=17 card 10 are not used.\\
 
-For TYPE=17, couplings, to all orders in RDEF, are calculated between all
+For TYPE=17, couplings to all orders in RDEF, are calculated between all
 pairs of projectile and target states using the matrix eigensolution
-method of Kermode and Rowley, Phys. Rev. {\bf C48} (1993) 2326.
+method of Kermode and Rowley, Phys. Rev. {\bf C48} (1993) 2326.\\
+
+For TYPE=18  generate deformed spin-orbit couplings from preceding TYPE=11 target 
+deformations.  The TYPE=11 namelist and the used central potential themselves should
+have nouse=T to remove those potentials  themselves being included.
+Rescale the real part by P1, the imaginary part by P2.
+
+
 
 \bigskip
 \subsubsection*{Card 12}
@@ -3281,7 +3290,7 @@ energy, damp, jtot,par,channel,width,rwa, leff
 
 {\tt kind=}{\bf 1: Variable potential parameter:}\\
 {\tt kp}: number of potential as on Card 10,\\
-{\tt pline}: order of which Card 10 within potential definition,\\
+{\tt pline}: order of which Card 10 within potential definition (not including empty namelists),\\
 {\tt col}:   number on Card 10: selecting P0--P7 ,\\
 {\tt potential}: value of this potential parameter (default {\tt null}: use {\tt input\_file})\\
 

@@ -1,7 +1,8 @@
 # Frescox
 Scattering code Frescox for coupled-channels calculations
 
-FRESCOX   FRXY version 7.2.2 at https://github.com/LLNL/Frescox
+FRESCOX   FRXY version 7.3 at https://github.com/LLNL/Frescox 
+
 LLNL-CODE-811517
 
 
@@ -14,9 +15,7 @@ The source/ directory contains : Fortran files *.f,
 
 The test/   directory contains : at least 6 test jobs xeta, lane20 & f19xfr,
                                              e80f49b, on2 & be11
-                                 their various outputs  SUN/*.out 
-               (The input files were originally CRAY UNICOS jobs,
-                hence the comments at the beginning.)
+
 
 The man/   directory contains the instruction manual in latex:
                       frescox-input-manual.tex: latex source 
@@ -33,10 +32,9 @@ To compile FRESCOX,
 	The script 'mk' attempts to guess the correct MACH settings
 	for ordinary frescox version AND compile in a corresponding subdirectory.
 
-   2) Edit aliases there,
-      to set FRESCOXLIB to point to directory for storing the binary
+   2) Set up ~/binw/`a=rch` to point to directory for storing the binary
 
-   3) Copy your aliases to ~/.fresco.aliases
+   3) Copy your aliases to e.g. ~/.fresco.aliases
       Edit FRESCOXLIB according to 2) above
       Execute .fresco.aliases e.g. in .cshrc  by including:	
         source ~/.fresco.aliases
@@ -47,6 +45,7 @@ If you are to install frescox yourself in a standard bin directory,
  If your compiler is gfortran, for example, then:
    2') Compile the subroutines required by:
         
+		mk gfortran
         make MACH=gfortran
 
    4) Install, to copy `frescox' to the FRESCOXLIB.
@@ -54,6 +53,28 @@ If you are to install frescox yourself in a standard bin directory,
 
    5) Clean up, with:	
         make clean
+
+To compile parallel versions:
+
+	1) There 4 options for run-time scripts that  follow binary name;
+ 
+    frescox_all:         serial     frescox
+    frescom_mpi_all:     MPI        frescom
+    frescoo_op_all :     OpenMP     frescoo
+    frescoom_op_mpi_all: MPI and OpenMP frescoom
+ 
+	2) To compile in the source/ directory, run
+ 
+		mk  <compiler>-<parallels> -j 10 install
+ 
+		where
+			<compiler> = intel or gfortran
+			<parallels> = mpi or mpich or openmp or op+mpi
+ 
+		The ‘mk’ script looks for all the compilation options 
+		in file fx<compiler>-<parallels>.def and builds in 
+		directory <compiler>-<parallels>/
+
   
 To run FRESCOX,
 
@@ -83,5 +104,5 @@ Please let me know if you have any questions or problems:
    I.Thompson@fresco.org.uk
 
 Cheers, Ian Thompson
-November 2022
+July 2025
 

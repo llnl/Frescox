@@ -47,11 +47,11 @@
       INTEGER CP,QQ,Q,ICOM(MAXCPL,2),ICOR(MAXCPL,2),GPT(2,MAXQRN),NG(2),
      &        FILE,CHNO(MFNL,6),LVAL(NCH),PART(NCH),EXCIT(MAXCH,3),
      &        COPY(2,MXP,MXX),QNF(19,MSP),CUTOFF,C1,C2,C2P,PARITY,
-     &        FPT(7,MAXQRN),ITC(MXP,MXX),MATRIX(6,MPAIR),C2LAST,
+     &        FPT(7,MAXQRN),ITC(MXP,MXX),MATRIX(9,MPAIR),C2LAST,
      &        NCLIST(MAXCH,MAXCH),NFLIST(MAXCH,MAXCH,MCLIST),NC,QC,LA,
      &        CPOT(MXP,MXX),PTYPE(12,MLOC),NEX(MXP)
       INTEGER PARITYP,BAND(2,MXP,MXX),PARITYJ,JPWCOUP(9,MPWCOUP)
-      INTEGER KMMI(3),KMMF(3),NFS(MLOC),POTCAP(MLOC,2),TAU,IDER
+      INTEGER KMMI(3),KMMF(3),NFS(MLOC),POTCAP(MLOC,2),TAU,IDER,TYPE
       LOGICAL REV,LOCAL,VREAL,REPEAT,LCL,MCL,R1DONE,REO,FAIL3,FRAC,PR,
      X   REVC,C1FR,LTRANS(MAXQRN),LCALL,MCALL,CPSO,SURF,  !,CPLD(NCH,NCH,0:4)
      x   LCLA,MCLA
@@ -93,8 +93,8 @@
   	REVC = REV.and..not.(CPSO.or.cxwf)  ! calculate full VSO matrix for now
 	if(LISTCC>0) write(48,*) ' For coupling # ',CP,': REVC =',REVC
 
-      GO TO (10,100,30,30,50,50,50,50,90,100,110),KIND
-C FOR KIND =  1   2  3  4  5  6  7  8  9, 10, 11
+      GO TO (120,10,100,30,30,50,50,50,50,90,100,110),KIND+1
+C FOR KIND = 0   1   2  3  4  5  6  7  8  9, 10, 11
 C
 C    SINGLE-PARTICLE INELASTIC EXCITATIONS (KIND=3 PROJ;  KIND=4 TARG)
 #ifdef corex
@@ -2002,12 +2002,11 @@ C                         L-dependent additional factor:
       CALL FNLREAD(FNC,NLN,NLL,NLO,HP(ICTO)*MR,DNL, LN,SN,JN,
      X           C1,C2,LVAL(C1),LVAL(C2),JPROJ(C1),JPROJ(C2),JTARG(C1),
      X           JTARG(C2),JVAL(C1),JVAL(C2),JTOTAL,INFILE,CH)
-!	write(450,*) BETAR,BETAI
         DO 15 I=1,NLL
         DO 15 J=1,NLO
         CCO = FNC(I,J) * CH
         FNC(I,J) = dcmplx(real(CCO)*BETAR,dimag(CCO)*BETAI)
-!  	 write(450,16) I,J,FNC(I,J) !,CCO
+!       write(450,16) I,J,FNC(I,J) !,CCO
 15	continue
 16	format(2i5,2f12.5,' from ',2f12.5)
 	if(NLPL>0) then
@@ -2155,14 +2154,14 @@ C    SO NOW NAME(1,IC1) IS LIKE D & NAME(1,IC2) LIKE P IN (D,P) REACTION
           DO 1202 C2P=1,NCH
           DO 1202 C2=1,NCH
 	    IF(IC2==PART(C2P).and.IC2==PART(C2)) then   ! both C2P,C2 in particle channels
-	    do 120 I=1,NCLIST(C2P,C2)
+	    do 1201 I=1,NCLIST(C2P,C2)
 	      KM = NFLIST(C2P,C2,I)
 	      !				find if KM already in list
 		do ifs=1,NFSS
-		if(NFS(ifs)==KM) go to 120  ! already
+		if(NFS(ifs)==KM) go to 1201  ! already
 		enddo
 		NFSS = NFSS+1;  NFS(NFSS)=KM  ! not already
-120	      continue
+1201	      continue
 	    endif
 1202	      continue
 	    if(LISTCC>0) write(KO,*) 
@@ -2523,6 +2522,72 @@ C            Make non-local overlap of sp wfns:
 
 	enddo ! IK
 C
+120    continue   !  KIND 0 external potential shapes
+
+       
+      DO 128 C1=1,NCH
+      DO 127 C2=1,NCH
+
+
+      DO 129 IX=NG(1),NG(2)
+
+       IB = MATRIX(1,IX)
+       IA = MATRIX(2,IX)
+       if(IA*IB==0) go to 129
+
+        IF(ICTO.NE.PART(C1) .OR. EXCIT(C1,1).NE.IB) GO TO 129
+        IF(ICFROM.NE.PART(C2) .or. EXCIT(C2,1).NE.IA) GO TO 129
+        IC = ICFROM
+
+
+
+       TYPE = MATRIX(3,IX)
+       KK = MATRIX(4,IX)
+       TAU= MATRIX(5,IX)
+       IDER= MATRIX(6,IX)
+       IT= MATRIX(7,IX)
+       IP1= MATRIX(8,IX)
+       KN = MATRIX(9,IX)
+
+      PTYPE(1,KN) = 0
+      PTYPE(2,KN) = TYPE
+      PTYPE(3,KN) = KK
+      PTYPE(4,KN) = IX-NG(1)+1 ! for readers only
+      PTYPE(5,KN) = 0
+      PTYPE(6,KN) = 0
+      PTYPE(7,KN) = TAU
+      PTYPE(8,KN) = IDER
+      PTYPE(9:12,KN) = 0
+
+       ETAS = 1.0  ! no isospin dependence here.
+       ITYP = 11   ! assume ordinary rotational model wanted.
+
+
+          CH =  TENSOR(TYPE, LVAL(C1),JPROJ(C1),JVAL(C1),JTARG(C1),
+     X                JTOTAL,LVAL(C2),JPROJ(C2),JVAL(C2),JTARG(C2),
+     X                KK,JEX(3,IC,IA),JEX(4,IC,IA),
+     X                 JEX(3,IC,IB),JEX(4,IC,IB),
+     X           MASS(3,IC),MASS(4,IC),ITYP,TAU,ETAS)
+     X     * (0.,1.)**(LVAL(C2)-LVAL(C1))
+
+C      if(listcc>2) write(KO,*)'form',IX,TYPE,'at KN=',KN,'@',C1,C2,CH
+       if(abs(CH)<1d-10) go to 129
+
+       if(listcc>2) 
+     x write(KO,125) C1,C2,KN,TYPE,KK,TAU,IDER,IT,CH,PTYPE(1:8,KN)
+125    format('For',I5,' from',I5,' by form',I5,' (',5I3,') get',2F15.6
+     x         ,8i3)
+
+C                     Local form factor:
+           NC = NCLIST(C1,C2)+1
+	   if(NC>MCLIST) call check(NC,MCLIST,30)
+	   CLIST(C1,C2,NC) =  CH 
+	   NFLIST(C1,C2,NC) = KN
+	   NCLIST(C1,C2) =  NC
+129   continue
+127      continue
+128    continue
+
 
 300   if(allocated(MCG)) deallocate(MCG)
 C This next deallocation caused some x86_64 to crash (wierd)
@@ -2568,11 +2633,11 @@ C
       END
 *****TENSORS************************************************************
       FUNCTION TENSOR(TYPE,L,S1,J,S2,JT,LP,S1P,JP,S2P,LAM,K1,K2,K1P,K2P,
-     &                ZP,ZT,ITYP,ETA)
+     &                ZP,ZT,ITYP,TAU,ETA)
       IMPLICIT REAL*8(A-H,O-Z)
       real*8,intent(in):: S1,J,S2,JT,S1P,JP,S2P,K1,K2,K1P,K2P,ZP,ZT,ETA
-      integer,intent(in):: TYPE,L,LP,LAM,ITYP
-      REAL*8 J2,J2MIN,J2MAX
+      integer,intent(in):: TYPE,L,LP,LAM,ITYP,TAU
+      REAL*8 J2,J2MIN,J2MAX,TSL,TSLP
 C
 C   calculate matrix elements of spin tensors between partial waves:
 C
@@ -2600,6 +2665,7 @@ C           T(13)=                    =  table couplings of target
 C           T(14)=                    =  2nd-order projectile 
 C           T(15)=                    =  2nd-order target 
 C           T(16)=                    =  2nd-order projectile and target
+C           T(18)=                    =  Thomas spin-orbit projectile (TAU=1,2,3)
 C           T(24) = T(25) = T(26) = T(27) = ETA
 C           T(30) = L(L+1)
 C           T(others)                         not used here
@@ -2609,7 +2675,7 @@ C
       IF(LAM.EQ.0.AND.ABS(S1-S1P)+ABS(S2-S2P).GT.0.01 .OR.TYPE.LT.0)
      X   RETURN
       GO TO (05,15,15,35,45,55,65,75,85,15,105,115,105,115,145,145,145,  ! 0 to 16
-     x       1,1,1,1,1,1,1,  245,245,245,245,1,1,305), 		         ! 17-23, 24-30
+     x       1,180,1,1,1,1,1,  245,245,245,245,1,1,305), 		         ! 17-23, 24-30
      X       		TYPE+1
    1  RETURN
 C
@@ -2737,6 +2803,35 @@ C                                            2nd ORDER PROJECTILE AND/OR TARGET
  145  WRITE(KO,*) 'Normal 2nd-order algebra should not be called!'
       WRITE(KO,*) TYPE,L,S1,J,S2,JT,LP,S1P,JP,S2P,LAM,K1,K2,K1P,K2P,ITYP
 	stop
+
+ 180  CH = 0.0
+      J2MIN = MAX(ABS(S2-L),ABS(JT-S1),ABS(S2P-LP))
+      J2MAX = MIN(    S2+L,     JT+S1 ,   S2P+LP )
+      T1 = (-1)**NINT(J-JP-L+LP)* SQRT((2*J+1)*(2*JP+1))
+      NJ2=NINT(J2MAX-J2MIN)
+      DO 182 IJ2=0,NJ2
+      J2=J2MIN+IJ2
+         T2 = (2*J2+1) * RACAH(S1,L+Z,JT,S2,J,J2)
+     &                * RACAH(S1,LP+Z,JT,S2P,JP,J2)
+         C6 = ROTOR(J2,S2,L,S2P,LP,LAM,K2,ITYP.LE.11)
+ 182   CH = CH + T1 * T2 * C6
+      if (abs(S1-S1P)>0.01) CH = 0.0
+
+      TSL  =  J * (J+1.)  - L * (L+1.)   - S1*(S1+1)
+      TSLP = JP * (JP+1.) - LP * (LP+1.) - S1*(S1+1)
+      if (TAU==1) then
+C       IF(.NOT.(L.EQ.LP .AND. ABS(J-JP).LT.0.01)) RETURN
+        T3 = TSLP
+      else if (TAU==2) then
+        T3 = TSLP - TSL
+      else !  TAU==3
+        T3 = LAM*(LAM+1) - (TSL-TSLP)*(TSL-TSLP-1.)
+      endif
+      TENSOR = CH * T3
+C     write(6,181) LAM,TAU,L,LP,CH,TSL,TSLP,T3,TENSOR
+181   format('LAM,TAU,L,LP=',4i3,' ROTOR=',f8.4,' TSL/P=',2f9.3,
+     x       ' T3,TENS=',2f9.3)
+      RETURN
 
  245  IF(L.EQ.LP .AND. ABS(J-JP).LT.0.01) TENSOR = ETA
       RETURN

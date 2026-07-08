@@ -1683,7 +1683,7 @@ C
       end
 
 C     ================================================================
-C     Five point differentiation formula (real functions)
+C     Five point differentiation formula (complex functions)
 C
       subroutine DERIVC(dpaFCT,dpaDF,Step,iRadialMax)
 

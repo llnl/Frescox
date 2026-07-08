@@ -733,7 +733,7 @@ C
       REAL*8 EPS,EXF(NLN),FNL(NLN,NLO)
       REAL*8 H(NCH)
       LOGICAL ITNL,EMPTY(MAXCH),SAME(MAXCH),SKIP(MAXCH),NREV,NFOR,SH,
-     &        SIMPLE(MAXCH),FFR,FED(MAXCH),CP,LOCFIL,DERIV
+     &        SIMPLE(MAXCH),FFR,FED(MAXCH),CP,LOCFIL,DERIV,DERIVS
       DATA EPS / 1E-12 /, CI / (0.0,1.0) /
 C
       DO 3 C=1,NCH
@@ -742,8 +742,9 @@ C
         DO 3 D=1,NCH
         DO 3 NC=1,NCLIST(C,D)
 	 IF = NFLIST(C,D,NC)
+        DERIV = PTYPE(8,IF)==1
          IF((C.EQ.D .OR. C.LE.IEX .AND. D.LE.IEX)
-     X      .AND.mod(PTYPE(6,IF),2).EQ.0) GO TO 3
+     X      .AND.mod(PTYPE(6,IF),2).EQ.0.and..not.DERIV) GO TO 3
             CP = ABS(CLIST(C,D,NC)).GT.EPS
         SKIP(C) = SKIP(C) .AND. (SAME(D).OR..NOT.CP)
         FED(C) = FED(C) .OR. CP.AND..NOT.EMPTY(D)
@@ -779,26 +780,52 @@ C
 9     INHOMG(I,C) = 0.0
 10    CONTINUE
 C
+      DERIVS = .false.
+      DO 101 D=1,NCH
+      DO 101 C=1,NCH
+      DO 101 NC=1,NCLIST(C,D)
+	 JF = NFLIST(C,D,NC)
+        DERIV = PTYPE(8,JF)==1
+      if (DERIV) DERIVS = .true.
+101    continue
+       
+
       if(.not.LOCFIL) then
       DO 15 D=1,NCH
+          if(DERIVS) CALL DERIVC(PSI(:,D),PSID,H(D),N)  
+C         if(DERIVS) write(6,*) D,'differentiated' 
       DO 15 C=1,NCH
       DO 15 NC=1,NCLIST(C,D)
 	 JF = NFLIST(C,D,NC)
+        DERIV = PTYPE(8,JF)==1
+C       if(DERIV) write(6,*) 'JF, PTYPE8 =',JF,PTYPE(8,JF),'for',C,D
+
 C        IF(C.EQ.D .OR. C.LE.IEX .AND. D.LE.IEX) GO TO 15
          IF((C.EQ.D .OR. C.LE.IEX .AND. D.LE.IEX)
-     X      .AND.mod(PTYPE(6,JF),2).EQ.0) GO TO 15
+     X      .AND.mod(PTYPE(6,JF),2).EQ.0 .and..not.DERIV) GO TO 15
          IF(D.gt.NICH) go to 15
          S = CLIST(C,D,NC)
          IF(ABS(S).LT.EPS.OR.SKIP(C).OR.EMPTY(D)) GO TO 15
+
 C     IF(SH) WRITE(KO,11) C,D,JF,S,IEX
       IF(ABS(WAVES).GE.2) WRITE(41,11) C,D,JF,S,IEX
 11    FORMAT('#ZR to',I3,' fr',I3,' by',I3,' of',2E14.3,'(IEX=',I3,')')
-         DO 12 I=max(1,ICUTC),N
-      INHOMG(I,C) = INHOMG(I,C) + S * FORMF(I,JF) * PSI(I,D)
-      IF(ABS(WAVES).GE.2.AND.ABS(WAVES).le.3)
-     X   WRITE(41,13) (I-1)*H(D) , INHOMG(I,C),PSI(I,D),FORMF(I,JF)
-12    CONTINUE
-13     FORMAT(F8.4,1P,6E12.3)
+       if (.not.DERIV) then
+       DO  I=max(1,ICUTC),N
+        INHOMG(I,C) = INHOMG(I,C) + S * FORMF(I,JF) * PSI(I,D)
+        enddo
+       else
+C      write(6,*) 'D->C uses derivative of psiD with JF=',JF
+       DO  I=max(1,ICUTC),N
+        INHOMG(I,C) = INHOMG(I,C) + S * FORMF(I,JF) * PSID(I)
+        enddo
+       endif
+       IF(ABS(WAVES).GE.2.AND.ABS(WAVES).le.3) then
+         do I=max(1,ICUTC),N
+          WRITE(41,13) (I-1)*H(D) , INHOMG(I,C),PSI(I,D),FORMF(I,JF)
+13          FORMAT(F8.4,1P,6E12.3)
+          enddo
+         endif
       IF(ABS(WAVES).GE.2.AND.ABS(WAVES).le.3) write(41,*) '&'
 15    CONTINUE
 	else
@@ -810,16 +837,22 @@ C     IF(SH) WRITE(KO,11) C,D,JF,S,IEX
       DO 26 I=IS,N
 	 read(19) FORMFR
       DO 25 D=1,NCH
+        if(I==IS.and.DERIVS) CALL DERIVC(PSI(:,D),PSID,H(D),N)   
       DO 25 C=1,NCH
       DO 25 NC=1,NCLIST(C,D)
 	 JF = NFLIST(C,D,NC)
+        DERIV = PTYPE(8,JF)==1
          IF((C.EQ.D .OR. C.LE.IEX .AND. D.LE.IEX)
-     X      .AND.mod(PTYPE(6,JF),2).EQ.0) GO TO 25
+     X      .AND.mod(PTYPE(6,JF),2).EQ.0.and..not.DERIV) GO TO 25
          IF(D.gt.NICH) go to 25
          S = CLIST(C,D,NC)
          IF(ABS(S).LT.EPS.OR.SKIP(C).OR.EMPTY(D)) GO TO 25
          IF(ABS(WAVES).GE.2.and.I==IS) WRITE(41,11) C,D,JF,S,IEX
-      INHOMG(I,C) = INHOMG(I,C) + S * FORMFR(JF) * PSI(I,D)
+      if(.not.DERIV) then
+        INHOMG(I,C) = INHOMG(I,C) + S * FORMFR(JF) * PSI(I,D)
+      else
+        INHOMG(I,C) = INHOMG(I,C) + S * FORMFR(JF) * PSID(I)
+      endif
 25    CONTINUE
 26    CONTINUE
 	endif

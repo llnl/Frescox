@@ -24,10 +24,10 @@
 #    modification are contained in the file COPYING.
 #
 #***********************************************************************
-mk gfortran -j 5 -k  -Woverriding-deployment-version
-mk gfortran-g -j 5 -k -Woverriding-deployment-version
-mk gfortran-mpif90 -j 5 -k -Woverriding-deployment-version
-mk gfortran-mpifort -j 5 -k -Woverriding-deployment-version
-mk gfortran-op+mpifort -j 5 -k -Woverriding-deployment-version
-mk gfortran-openmp-g -j 5 -k -Woverriding-deployment-version
-mk gfortran-openmp -j 5 -k -Woverriding-deployment-version
+mk gfortran -j 5 -k  
+mk gfortran-g -j 5 -k 
+mk gfortran-mpif90 -j 5 -k 
+mk gfortran-mpifort -j 5 -k 
+mk gfortran-op+mpifort -j 5 -k 
+mk gfortran-openmp-g -j 5 -k 
+mk gfortran-openmp -j 5 -k 

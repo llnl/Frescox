@@ -862,10 +862,10 @@ C                next JIN    :
      X    MR,NL,CHNO(MFNL,6),NLO,NLN,NLC,MLT,MLM,ICUTC,C,D,
      X    CUTOFF(Nstate),vsearch,c1,c2,PTYPE(12,MLOC)
 	complex*16 FORMF(MAXM,MLOC),CLIST(MAXCH,MAXCH,MCLIST),VV,VV1
-	complex*16 AA(nd,nd),ww(numr),SSC(nbmax),wwd(numr),
+	complex*16 AA(nd,nd),ww(numr),SSC(nbmax),wwd(numr,MLOC),
      X	  FNC(NLN,NLO),VNC(1:numr,1:MLM),ECF(NLN)
 	logical pertcent,coupled,blas1,blas2,FFR,SH,NREV,ISNONO,
-     X		prba,incl,forward,reverse,joined,derd
+     X		prba,incl,forward,reverse,joined
 	parameter (pertcent=.false.,blas1=.true.,blas2=.false.,
      X  	   SH=.false.)
 !			Adjust blas1 and blas2 for best times in your system
@@ -962,16 +962,16 @@ c --------------------------------------------
 	  ryev = -coef(kv1)
 	  kv2l=Nstate
 	kv2=c2
-	  ww(:) = 0d0; wwd(:)=0d0
+	  ww(:) = 0d0; wwd(:,:) = 0d0
 	  if(vsearch>0) wwsrch(:) = 0.
-	  coupled=.false.; derd=.false.
+	  coupled=.false.
 	  do NC=1,NCLIST(kv1,kv2)
 	   ifm = NFLIST(kv1,kv2,NC)
 !	    incl = vsearch==0 .or. vsearch>0.and.ifm.ne.vsearch
 	    incl = ifm.ne.vsearch
 	   if(abs(CLIST(kv1,kv2,NC))>1e-20) then
 	     coupled=.true.;  joined = .true.
-            if(PTYPE(7,ifm)/=1) then ! Scalar potential
+        if(PTYPE(8,ifm)==0) then ! Scalar potential, otherwise d(wf)/dr
 	    if(incl) then
 	     if(blas1) then
 	       call zaxpy(numr,CLIST(kv1,kv2,NC),FORMF(1,ifm),1,ww,1)
@@ -983,13 +983,12 @@ c --------------------------------------------
 	    endif  ! incl
            else   ! derivative potential
              if(incl) then
-               wwd(:) = wwd(:) + CLIST(kv1,kv2,NC)*FORMF(1:numr,ifm)
-               derd = .true.
+              wwd(:,ifm)=wwd(:,ifm)+CLIST(kv1,kv2,NC)*FORMF(1:numr,ifm)
              else
                 write(6,*) ' Searching on derivatives not implemented'
                 stop
              endif
-            endif  ! PTYPE(7,IF)/=1	    
+            endif  ! PTYPE(7,IF)/=1 and PTYPE(8,IF)==0    
 	    endif  ! CLIST
 	   enddo  ! NC
 	  if(coupled) then
@@ -1022,10 +1021,11 @@ c					l2max so k2.le.k1 if symm.
 	  enddo ! i
 	
 !                               acting on WF derivatives to right (less optimised code!)
-         if(derd) then
+        do ifm=1,MLOC
+         if(PTYPE(8,ifm)==1) then
           do i=2,numr-1
             rrad = (i-1)*hcm(kv1)
-               VV = wwd(i) 
+               VV = wwd(i,ifm) 
               if(pertcent) stop 'percent & derivatives not implemented'
               VV = VV * wrad(i) * hcm(kv1) / hcm(kv2) / 2.0
      &                  * (0.,1.)**(LCHL(kv1)-LCHL(kv2))
@@ -1035,11 +1035,12 @@ c					l2max so k2.le.k1 if symm.
               l2max = nsturm(kv2)
 c                                       l2max so k2.le.k1 if symm.
 	     	AA(k1,1:l2max) = AA(k1,1:l2max) + 
-     x            (SS(i+1,1:l2max)-SS(i-1,1:l2max)) * VV1vi fxx
+     x            (SS(i+1,1:l2max)-SS(i-1,1:l2max)) * VV1
              enddo ! l1
           enddo ! i
-        endif ! derd	
-	
+          endif ! DERS=1 (otherwise assume 0)
+       enddo ! ifm	
+
 !			 put search potential into kk not AA
 	  if(vsearch>0) then
 	   write(481,*) ' Channels ',kv1,' <- ',kv2,':  wwsrch ='
