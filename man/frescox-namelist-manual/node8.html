@@ -32,7 +32,7 @@
 <A
  HREF="node7.html">
 <IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A> 
-<A ID="tex2html137"
+<A ID="tex2html139"
   HREF="node1.html">
 <IMG WIDTH="65" HEIGHT="24" ALT="contents" SRC="contents.png"></A>  
 <BR>
@@ -42,7 +42,7 @@
  HREF="node4.html">Input NAMELIST format</A>
 <B> Previous:</B> <A
  HREF="node7.html">&amp;PARTITION and &amp;STATES namelists</A>
- &nbsp; <B>  <A ID="tex2html138"
+ &nbsp; <B>  <A ID="tex2html140"
   HREF="node1.html">Contents</A></B> 
 <BR>
 <BR></DIV>
@@ -51,23 +51,25 @@
 <A ID="CHILD_LINKS"><STRONG>Subsections</STRONG></A>
 
 <UL CLASS="ChildLinks">
-<LI><A ID="tex2html139"
+<LI><A ID="tex2html141"
   HREF="node8.html#SECTION00044100000000000000">First kind of &amp;pot namelist</A>
-<LI><A ID="tex2html140"
+<LI><A ID="tex2html142"
   HREF="node8.html#SECTION00044200000000000000">Second kind of &amp;pot namelist: TYPE<SPAN CLASS="MATH"><IMG
  STYLE=""
  SRC="img1.svg"
  ALT="$&gt;$"></SPAN>0</A>
-<LI><A ID="tex2html141"
+<LI><A ID="tex2html143"
   HREF="node8.html#SECTION00044300000000000000">Deformations</A>
-<LI><A ID="tex2html142"
+<LI><A ID="tex2html144"
   HREF="node8.html#SECTION00044400000000000000">Pairwise couplings</A>
 </UL>
 <!--End of Table of Child-Links-->
 <HR>
 
-<H2><A ID="SECTION00044000000000000000">
-&amp;POT potential namelists</A>
+<H2><A ID="SECTION00044000000000000000"></A>
+<A ID="potentials"></A>
+<BR>
+&amp;POT potential namelists
 </H2>
 Each potential is started by a &amp;pot namelist with TYPE=0, defining the radii to be used
 and the diagonal Coulomb potential, followed by any number of further &amp;pot namelists with TYPE<SPAN CLASS="MATH"><IMG
@@ -216,6 +218,8 @@ For		TYPE
 <BR>
 17		 		Target &amp; projectile all-order coupled by matrix elements read in.
 <BR>
+18		 		Generate deformed spin-orbit forces from preceding TYPE=11 target deformations.
+<BR>
 20		NUM		Super-soft N-N potl. of de Tourreil &amp; Sprung (SSC(C))
 <BR>
 21		NUM		User-supplied N-N potential via subroutine NNPOT.
@@ -227,7 +231,11 @@ TYPE indicates type of spin tensor or excitation coupling,
 <P>
 IT is 1 or 3 to make this component included only iteratively,
 <BR>
-2 or 3 to NOT subtract this component in KIND=3,4 single-particle  couplings,
+2 or 3 to NOT subtract this component in KIND=3,4 single-particle  couplings, 
+<BR>   `-'  to NOT use this form to couple channels (only  to make other forms, e.g. deformations).
+
+<P>
+NOUSE true (`T') to NOT USE this form to couple channels (only  to make other forms, e.g. deformations),
 
 <P>
 SHAPE indicates the radial shape of the form factor,
@@ -767,7 +775,7 @@ Mn(Ek) = \langle I ' || Ek || I \rangle
  STYLE=""
  SRC="img112.svg"
  ALT="$\displaystyle Mn(Ek) = \langle I ' \vert\vert Ek \vert\vert I \rangle
-/ (\sqrt {2I+1} \langle IK k0 \vert I ' K \rangle ) \ .$"></TD>
+/ (\sqrt {2I+1} \langle IK k0 \vert I ' K \rangle )  .$"></TD>
 <TD>&nbsp;</TD>
 <TD>&nbsp;</TD>
 <TD CLASS="eqno" WIDTH=10 ALIGN="RIGHT">
@@ -794,7 +802,7 @@ Mn(E2) is related to the intrinsic quadrupole moment in the rotational model by
 <SPAN CLASS="MATH"><IMG
  STYLE=""
  SRC="img115.svg"
- ALT="$Mn(Ek) = Q _ 0 ~ \sqrt {5 / {16 \pi}}$"></SPAN>.
+ ALT="$Mn(Ek) = Q _ 0&nbsp; \sqrt {5 / {16 \pi}}$"></SPAN>.
 For a uniformly charged sphere of radius <SPAN CLASS="MATH"><IMG
  STYLE=""
  SRC="img116.svg"
@@ -814,7 +822,7 @@ Mn(Ek) = {{3 ~ Z ~ \beta _ k ~ R^k} \over {4 \pi}}  \ .
 <TR VALIGN="MIDDLE"><TD NOWRAP ALIGN="RIGHT"><IMG
  STYLE=""
  SRC="img118.svg"
- ALT="$\displaystyle Mn(Ek) = {{3 ~ Z ~ \beta _ k ~ R^k} \over {4 \pi}} \ .$"></TD>
+ ALT="$\displaystyle Mn(Ek) = {{3&nbsp; Z&nbsp; \beta _ k&nbsp; R^k} \over {4 \pi}}  .$"></TD>
 <TD>&nbsp;</TD>
 <TD>&nbsp;</TD>
 <TD CLASS="eqno" WIDTH=10 ALIGN="RIGHT">
@@ -855,7 +863,7 @@ M(Ek) & = &i^{ I-I ' + |I-I ' | } ~ \langle I ' || Ek || I \rangle \\
 <TD ALIGN="LEFT" NOWRAP><IMG
  STYLE=""
  SRC="img122.svg"
- ALT="$\displaystyle i^{ I-I ' + \vert I-I ' \vert } ~ \langle I ' \vert\vert Ek \vert\vert I \rangle$"></TD>
+ ALT="$\displaystyle i^{ I-I ' + \vert I-I ' \vert }&nbsp; \langle I ' \vert\vert Ek \vert\vert I \rangle$"></TD>
 <TD CLASS="eqno" WIDTH=10 ALIGN="RIGHT">
 (<SPAN CLASS="arabic">4</SPAN>)</TD></TR>
 <TR VALIGN="MIDDLE"><TD NOWRAP ALIGN="RIGHT">&nbsp;</TD>
@@ -866,7 +874,7 @@ M(Ek) & = &i^{ I-I ' + |I-I ' | } ~ \langle I ' || Ek || I \rangle \\
 <TD ALIGN="LEFT" NOWRAP><IMG
  STYLE=""
  SRC="img123.svg"
- ALT="$\displaystyle \pm \sqrt{ (2I+1) ~ B(Ek, I \rightarrow I ' ) } \ ,$"></TD>
+ ALT="$\displaystyle \pm \sqrt{ (2I+1)&nbsp; B(Ek, I \rightarrow I ' ) }  ,$"></TD>
 <TD CLASS="eqno" WIDTH=10 ALIGN="RIGHT">
 (<SPAN CLASS="arabic">5</SPAN>)</TD></TR>
 </TABLE></DIV>
@@ -890,7 +898,7 @@ Q_2 = \sqrt {{16 \pi} /5} ~ (2I+1)^{-1/2} ~ \langle II 20 | II \rangle ~\langle 
 <TR VALIGN="MIDDLE"><TD NOWRAP ALIGN="RIGHT"><IMG
  STYLE=""
  SRC="img125.svg"
- ALT="$\displaystyle Q_2 = \sqrt {{16 \pi} /5} ~ (2I+1)^{-1/2} ~ \langle II 20 \vert II \rangle ~\langle I \vert\vert E2 \vert\vert I \rangle \ .$"></TD>
+ ALT="$\displaystyle Q_2 = \sqrt {{16 \pi} /5}&nbsp; (2I+1)^{-1/2}&nbsp; \langle II 20 \vert II \rangle&nbsp;\langle I \vert\vert E2 \vert\vert I \rangle  .$"></TD>
 <TD>&nbsp;</TD>
 <TD>&nbsp;</TD>
 <TD CLASS="eqno" WIDTH=10 ALIGN="RIGHT">
@@ -909,7 +917,7 @@ M(Ek) = Mn(Ek) ~ (-1)^{ [I-I ' +|I-I ' |]/2} ~ \sqrt{2I+1}  \langle IK k0 | I ' 
 <TR VALIGN="MIDDLE"><TD NOWRAP ALIGN="RIGHT"><IMG
  STYLE=""
  SRC="img126.svg"
- ALT="$\displaystyle M(Ek) = Mn(Ek) ~ (-1)^{ [I-I ' +\vert I-I ' \vert]/2} ~ \sqrt{2I+1} \langle IK k0 \vert I ' K \rangle$"></TD>
+ ALT="$\displaystyle M(Ek) = Mn(Ek)&nbsp; (-1)^{ [I-I ' +\vert I-I ' \vert]/2}&nbsp; \sqrt{2I+1} \langle IK k0 \vert I ' K \rangle$"></TD>
 <TD>&nbsp;</TD>
 <TD>&nbsp;</TD>
 <TD CLASS="eqno" WIDTH=10 ALIGN="RIGHT">
@@ -1031,7 +1039,7 @@ RDEF(k, I \rightarrow I')
 <TD ALIGN="LEFT" NOWRAP><IMG
  STYLE=""
  SRC="img135.svg"
- ALT="$\displaystyle DEF(k) (-1)^{ [I-I'+\vert I-I'\vert]/2} \sqrt{2I+1} ~ \langle IK k0 \vert I'K\rangle$"></TD>
+ ALT="$\displaystyle DEF(k) (-1)^{ [I-I'+\vert I-I'\vert]/2} \sqrt{2I+1}&nbsp; \langle IK k0 \vert I'K\rangle$"></TD>
 <TD CLASS="eqno" WIDTH=10 ALIGN="RIGHT">
 (<SPAN CLASS="arabic">8</SPAN>)</TD></TR>
 <TR VALIGN="MIDDLE"><TD NOWRAP ALIGN="RIGHT">&nbsp;</TD>
@@ -1084,7 +1092,7 @@ F(r) = M(Ek) ~ e^2 ~ {\sqrt{4\pi}   \over  (2k+1)}~  r^{-k-1}
 <TR VALIGN="MIDDLE"><TD NOWRAP ALIGN="RIGHT"><IMG
  STYLE=""
  SRC="img137.svg"
- ALT="$\displaystyle F(r) = M(Ek) ~ e^2 ~ {\sqrt{4\pi} \over (2k+1)}~ r^{-k-1}$"></TD>
+ ALT="$\displaystyle F(r) = M(Ek)&nbsp; e^2&nbsp; {\sqrt{4\pi} \over (2k+1)}&nbsp; r^{-k-1}$"></TD>
 <TD>&nbsp;</TD>
 <TD>&nbsp;</TD>
 <TD CLASS="eqno" WIDTH=10 ALIGN="RIGHT">
@@ -1116,7 +1124,7 @@ F(r) = - DEF(k) ~  \frac{1}{\sqrt{4\pi}} ~ \frac{dU(r)}{dr}
 <TR VALIGN="MIDDLE"><TD NOWRAP ALIGN="RIGHT"><IMG
  STYLE=""
  SRC="img140.svg"
- ALT="$\displaystyle F(r) = - DEF(k) ~ \frac{1}{\sqrt{4\pi}} ~ \frac{dU(r)}{dr}$"></TD>
+ ALT="$\displaystyle F(r) = - DEF(k)&nbsp; \frac{1}{\sqrt{4\pi}}&nbsp; \frac{dU(r)}{dr}$"></TD>
 <TD>&nbsp;</TD>
 <TD>&nbsp;</TD>
 <TD CLASS="eqno" WIDTH=10 ALIGN="RIGHT">
@@ -1186,6 +1194,12 @@ method of Kermode and Rowley, Phys. Rev. <B>C48</B> (1993) 2326.
 The SHAPE and P0-P6 parameters on the TYPE=17 &amp;pot namelist are not used.
 
 <P>
+For TYPE=18  generate deformed spin-orbit couplings from preceding TYPE=11 target 
+deformations.  The TYPE=11 namelist and the used central potential themselves should
+have nouse=T to remove those potentials  themselves  being included.
+Rescale the real part by P1, the imaginary part by P2.
+
+<P>
 
 <DIV CLASS="navigation"><HR>
 <!--Navigation Panel-->
@@ -1198,7 +1212,7 @@ The SHAPE and P0-P6 parameters on the TYPE=17 &amp;pot namelist are not used.
 <A
  HREF="node7.html">
 <IMG WIDTH="63" HEIGHT="24" ALT="previous" SRC="prev.png"></A> 
-<A ID="tex2html137"
+<A ID="tex2html139"
   HREF="node1.html">
 <IMG WIDTH="65" HEIGHT="24" ALT="contents" SRC="contents.png"></A>  
 <BR>
@@ -1208,7 +1222,7 @@ The SHAPE and P0-P6 parameters on the TYPE=17 &amp;pot namelist are not used.
  HREF="node4.html">Input NAMELIST format</A>
 <B> Previous:</B> <A
  HREF="node7.html">&amp;PARTITION and &amp;STATES namelists</A>
- &nbsp; <B>  <A ID="tex2html138"
+ &nbsp; <B>  <A ID="tex2html140"
   HREF="node1.html">Contents</A></B> </DIV>
 <!--End of Navigation Panel-->
 

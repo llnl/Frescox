@@ -17,5 +17,13 @@ $noresave{$key} = "$nosave";
 # labels from external_latex_labels array.
 
 
+$key = q/operator/;
+$external_latex_labels{$key} = q|4|; 
+$noresave{$key} = "$nosave";
+
+$key = q/transfer/;
+$external_latex_labels{$key} = q|3|; 
+$noresave{$key} = "$nosave";
+
 1;
 

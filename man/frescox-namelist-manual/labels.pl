@@ -10,6 +10,10 @@ $key = q/operator/;
 $external_labels{$key} = "$URL/" . q|node18.html|; 
 $noresave{$key} = "$nosave";
 
+$key = q/potentials/;
+$external_labels{$key} = "$URL/" . q|node8.html|; 
+$noresave{$key} = "$nosave";
+
 $key = q/spintransfers/;
 $external_labels{$key} = "$URL/" . q|node18.html|; 
 $noresave{$key} = "$nosave";
@@ -31,6 +35,10 @@ $noresave{$key} = "$nosave";
 
 $key = q/operator/;
 $external_latex_labels{$key} = q|17|; 
+$noresave{$key} = "$nosave";
+
+$key = q/potentials/;
+$external_latex_labels{$key} = q|3.4|; 
 $noresave{$key} = "$nosave";
 
 $key = q/spintransfers/;

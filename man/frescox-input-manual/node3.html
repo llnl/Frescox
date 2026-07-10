@@ -97,8 +97,7 @@ Wave functions calculated at intervals of HCM up to abs(RMATCH).
 
 <P>
 If RMATCH <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img12.svg"
+ STYLE="height: 1.49ex; vertical-align: -0.19ex; " SRC="img12.svg"
  ALT="$&lt;$"></SPAN> 0, then read Card 1a for  coupled Coulomb wave functions.
 
 <P>
@@ -107,15 +106,12 @@ Non-local kernels <!-- MATH
  $K_{fi}'(R_{f},D_{fi})$
  -->
 <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img6.svg"
+ STYLE="height: 2.87ex; vertical-align: -1.08ex; " SRC="img6.svg"
  ALT="$K_{fi}'(R_{f},D_{fi})$"></SPAN> calculated at <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img13.svg"
+ STYLE="height: 2.31ex; vertical-align: -0.77ex; " SRC="img13.svg"
  ALT="$R_f$"></SPAN> intervals of RINTP,
 and for a non-local (<SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img5.svg"
+ STYLE="height: 2.31ex; vertical-align: -0.77ex; " SRC="img5.svg"
  ALT="$D_{fi}$"></SPAN>) range of RNL centred at CENTRE in steps of HNL.
 RMATCH and RINTP are rounded to multiples of HCM, and HNL is rounded either to
 a multiple or a sub-multiple of HCM.
@@ -151,8 +147,7 @@ inner radius abs(RMATCH) for those partitions in which PWF is TRUE.
 
 <BR>
 If RASYM <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img12.svg"
+ STYLE="height: 1.49ex; vertical-align: -0.19ex; " SRC="img12.svg"
  ALT="$&lt;$"></SPAN> 0, then determine the outer radius in order that classical
 Coulomb trajectories reach an angle abs(RASYM) degrees.
 
@@ -179,8 +174,7 @@ This is only allowed when <!-- MATH
  $J_{total} \geq$
  -->
 <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img14.svg"
+ STYLE="height: 2.00ex; vertical-align: -0.46ex; " SRC="img14.svg"
  ALT="$J_{total} \geq $"></SPAN>AJSWITCH.
 
 <P><P>
@@ -200,26 +194,21 @@ JTMIN,JTMAX,ABSEND,DRY,CSET, RELA, NEARFA,(JUMP(i),JBORD(i),i=2,5)
 5ex1
 Calculate coupled-channels sets with total J in the interval
 max(0,JTMIN) <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img12.svg"
+ STYLE="height: 1.49ex; vertical-align: -0.19ex; " SRC="img12.svg"
  ALT="$&lt;$"></SPAN> J  <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img12.svg"
+ STYLE="height: 1.49ex; vertical-align: -0.19ex; " SRC="img12.svg"
  ALT="$&lt;$"></SPAN> JTMAX,
 stopping sooner if the absorbtion from the elastic channel
 is less than ABSEND millibarns of three successive J/parity sets.
 (If ABSEND <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img12.svg"
+ STYLE="height: 1.49ex; vertical-align: -0.19ex; " SRC="img12.svg"
  ALT="$&lt;$"></SPAN> 0, this takes the full J interval.)
 
 <BR>
 If JTMIN <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img12.svg"
+ STYLE="height: 1.49ex; vertical-align: -0.19ex; " SRC="img12.svg"
  ALT="$&lt;$"></SPAN> 0, then for J <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img12.svg"
+ STYLE="height: 1.49ex; vertical-align: -0.19ex; " SRC="img12.svg"
  ALT="$&lt;$"></SPAN> abs(JTMIN) include only the incoming channel
 in the calculations, ignoring tranfers and excited states.
 This is needed if the elastic scattering cross sections are to be given
@@ -274,32 +263,27 @@ mod(NEARFA,10) = 0 or 1 for the usual cross sections,
 <BR>= 3 or -3 for printing far and near side cross sections too.
 
 <BR><SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img15.svg"
+ STYLE="height: 1.49ex; vertical-align: -0.19ex; " SRC="img15.svg"
  ALT="$&gt;$"></SPAN> 0 for printing far &amp; near-sides for elastic channel only.
 
 <BR><SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img12.svg"
+ STYLE="height: 1.49ex; vertical-align: -0.19ex; " SRC="img12.svg"
  ALT="$&lt;$"></SPAN> 0 for printing far &amp; near-sides for all channels.
 <BR>
 If abs(NEARFA)<SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img15.svg"
+ STYLE="height: 1.49ex; vertical-align: -0.19ex; " SRC="img15.svg"
  ALT="$&gt;$"></SPAN>10, also split the Coulomb amplitude according to Cha, CPC 176 (2007) 318.
 
 <P>
 5ex1
 JUMP(i),JBORD(i) : Calculate coupled-channels sets not for every J
 value, but at intervals of JUMP(i) for J <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img16.svg"
+ STYLE="height: 1.90ex; vertical-align: -0.39ex; " SRC="img16.svg"
  ALT="$\geq$"></SPAN> JBORD(i), for i=1,5.
 (The program sets JUMP(1)=1 &amp; JBORD(1)=JTMIN, to give no J jumping initially).
 The omitted J values are provided by interpolation on the scattering
 amplitudes <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img17.svg"
+ STYLE="height: 2.44ex; vertical-align: -0.66ex; " SRC="img17.svg"
  ALT="$A(m'M':mM; L)$"></SPAN> prior to calculating cross sections.
 
 <P>
@@ -318,8 +302,7 @@ for centre-of-mass scattering angle from THMIN
 to abs(THMAX) in steps of THINC.
 <BR>
 Elastic channels normally output the ratio to Rutherford, unless THMAX <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img18.svg"
+ STYLE="height: 1.77ex; vertical-align: -0.19ex; " SRC="img18.svg"
  ALT="$&lt; 0$"></SPAN>.
 <BR>
 Calculate analysing powers/polarisations for projectile (PP=0 or blank),
@@ -347,45 +330,36 @@ CUTL = radial points per L (angular momentum of partial wave)
 of lower radial cutoff when integrating the radial equations. Default = -1.6
 <BR>
 When CUTL<SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img15.svg"
+ STYLE="height: 1.49ex; vertical-align: -0.19ex; " SRC="img15.svg"
  ALT="$&gt;$"></SPAN>0, use <!-- MATH
  $\ell=J_{total}$
  -->
 <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img19.svg"
+ STYLE="height: 2.08ex; vertical-align: -0.46ex; " SRC="img19.svg"
  ALT="$\ell=J_{total}$"></SPAN> (total angular momentum of CC set),
 <BR>
 When CUTL<SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img12.svg"
+ STYLE="height: 1.49ex; vertical-align: -0.19ex; " SRC="img12.svg"
  ALT="$&lt;$"></SPAN>0, use <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img20.svg"
+ STYLE="height: 2.08ex; vertical-align: -0.45ex; " SRC="img20.svg"
  ALT="$\ell=L_{in}$"></SPAN> (orbital angular momentum of incoming partial wave).
 <BR>
 Using  CUTL<SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img12.svg"
+ STYLE="height: 1.49ex; vertical-align: -0.19ex; " SRC="img12.svg"
  ALT="$&lt;$"></SPAN>0 gives more accurate analysing powers.
 
 <P>
 5ex1
 CUTR = lower radial cutoff (fm).  Use max(CUTL*<SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img21.svg"
+ STYLE="height: 1.73ex; vertical-align: -0.10ex; " SRC="img21.svg"
  ALT="$\ell$"></SPAN>*HCM,CUTR).
 <BR>
 If CUTR <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img12.svg"
+ STYLE="height: 1.49ex; vertical-align: -0.19ex; " SRC="img12.svg"
  ALT="$&lt;$"></SPAN> 0, put cutoff at point-Coulomb turning point <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img22.svg"
+ STYLE="height: 2.41ex; vertical-align: -0.66ex; " SRC="img22.svg"
  ALT="$- \vert$"></SPAN>CUTR<SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img23.svg"
+ STYLE="height: 2.41ex; vertical-align: -0.66ex; " SRC="img23.svg"
  ALT="$\vert$"></SPAN>.
 
 <P>
@@ -426,8 +400,7 @@ Putting IT0=ITER = 1 or 2 etc. gives 1 or 2-step DWBA.
 <BR>
 Normally, a run is terminated if more than ITER steps are required for
 convergence. Setting ITER <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img12.svg"
+ STYLE="height: 1.49ex; vertical-align: -0.19ex; " SRC="img12.svg"
  ALT="$&lt;$"></SPAN> 0 allows continuation even after
 convergence has failed after abs(ITER) iterations.
 
@@ -435,8 +408,7 @@ convergence has failed after abs(ITER) iterations.
 Iterations are normally also stopped if the successive differences are smaller
 than the errors estimated for the numerical integration of the coupled
 equations. Setting IPS <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img18.svg"
+ STYLE="height: 1.77ex; vertical-align: -0.19ex; " SRC="img18.svg"
  ALT="$&lt; 0$"></SPAN> uses abs(IPS), without this extra check.
 
 <P>
@@ -446,8 +418,7 @@ IBLOCK is the number of pairs of excitation levels
 blocking together.
 <BR>
 If IBLOCK<SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img12.svg"
+ STYLE="height: 1.49ex; vertical-align: -0.19ex; " SRC="img12.svg"
  ALT="$&lt;$"></SPAN>1, then read Card 4.5 (see below) for R-matrix solution of the
 coupled equations.
 
@@ -468,24 +439,20 @@ ISO
 <BR>= 0 or blank, for no isocentrifugal approximations,
 
 <BR>= A or J, for replacing all barriers by <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img24.svg"
+ STYLE="height: 2.00ex; vertical-align: -0.46ex; " SRC="img24.svg"
  ALT="$L = J_{total}$"></SPAN> barrier
 
 <BR>= B or L, for replacing all barriers by <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img25.svg"
+ STYLE="height: 1.99ex; vertical-align: -0.45ex; " SRC="img25.svg"
  ALT="$L = L_{in}$"></SPAN> barrier.
 
 <P>
 Of course, the <EM>simplest and fastest</EM> way to use the isocentrifugal
 approximation is to put all spins and parities to <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img26.svg"
+ STYLE="height: 1.98ex; vertical-align: -0.14ex; " SRC="img26.svg"
  ALT="$0^+$"></SPAN>, and all
 transition multipoles to <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img27.svg"
+ STYLE="height: 1.76ex; vertical-align: -0.14ex; " SRC="img27.svg"
  ALT="$k=0$"></SPAN>. The ISO variable is not needed then.
 
 <P>
@@ -502,14 +469,11 @@ MAXL,MINL are the maximum and minimum L values
 for the non-local
 kernels. If zero, MAXL has the default value JTMAX+6, and
 if MINL <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img12.svg"
+ STYLE="height: 1.49ex; vertical-align: -0.19ex; " SRC="img12.svg"
  ALT="$&lt;$"></SPAN> 0 it takes the default value <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img23.svg"
+ STYLE="height: 2.41ex; vertical-align: -0.66ex; " SRC="img23.svg"
  ALT="$\vert$"></SPAN>JTMIN<SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img23.svg"
+ STYLE="height: 2.41ex; vertical-align: -0.66ex; " SRC="img23.svg"
  ALT="$\vert$"></SPAN>-6.
 
 <P>
@@ -517,8 +481,7 @@ if MINL <SPAN CLASS="MATH"><IMG
 MTMIN is the lowest L-transfer for calculating transfer form factors
 using the m-dependent expressions for spherical harmonics.
 Putting MTMIN = 0 gives default value MTMIN = 6 (use MTMIN <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img12.svg"
+ STYLE="height: 1.49ex; vertical-align: -0.19ex; " SRC="img12.svg"
  ALT="$&lt;$"></SPAN> 0 to avoid
 invoking default, if all transfers are to use this method).
 
@@ -527,30 +490,25 @@ invoking default, if all transfers are to use this method).
 EPC = percentage cutoff accuracy in the
 NNU angular integration.
 If zero, the default is (30/NNU)<SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img28.svg"
+ STYLE="height: 2.09ex; vertical-align: -0.10ex; " SRC="img28.svg"
  ALT="$^2$"></SPAN>%.
 
 <P>
 5ex1
 ERANGE = range of energies of the upper and lower boundaries
 of continuum bins: if ERANGE <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img15.svg"
+ STYLE="height: 1.49ex; vertical-align: -0.19ex; " SRC="img15.svg"
  ALT="$&gt;$"></SPAN> 0, then RATIO of these energies;
 if ERANGE <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img12.svg"
+ STYLE="height: 1.49ex; vertical-align: -0.19ex; " SRC="img12.svg"
  ALT="$&lt;$"></SPAN> 0, then DIFFERENCE of the energies in MeV.
 
 <P>
 5ex1
 DK     = step size of <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img29.svg"
+ STYLE="height: 1.75ex; vertical-align: -0.13ex; " SRC="img29.svg"
  ALT="$k$"></SPAN> (fm<SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img30.svg"
+ STYLE="height: 2.09ex; vertical-align: -0.10ex; " SRC="img30.svg"
  ALT="$^{-1}$"></SPAN>) for integration over
 the ERANGE to construct the continuum bin.
 
@@ -603,8 +561,7 @@ ELPMAX = energy ELAB below which the LPMAX in each partition are applied
 Card 4.5</A>
 </H3>
 If IBLOCK<SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img12.svg"
+ STYLE="height: 1.49ex; vertical-align: -0.19ex; " SRC="img12.svg"
  ALT="$&lt;$"></SPAN>0, then read:
 <PRE>
 2i4,           I1,    L1,     I2,  i2,   f6.4, 3f8.4,1x,A1
@@ -617,8 +574,7 @@ NRBASES = target number of radial basis states in each channel.
 (Use 2*NRBASES for the elastic and first-inelastic channel for more accuracy).
 <BR>
 If NRBASES <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img12.svg"
+ STYLE="height: 1.49ex; vertical-align: -0.19ex; " SRC="img12.svg"
  ALT="$&lt;$"></SPAN> 0, then use <B>Lagrange mesh</B> with NLAG=&ndash;NRBASES basis functions.
 
 <P>
@@ -642,8 +598,7 @@ meaning as IPC on Cards 13 for single-particle bound states).
 <P>
 5ex1
 MEIGS = maximum number of bound states to find, if ENLAB <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img12.svg"
+ STYLE="height: 1.49ex; vertical-align: -0.19ex; " SRC="img12.svg"
  ALT="$&lt;$"></SPAN> 0 on Card 19.
 
 <P>
@@ -658,38 +613,31 @@ Use i=1,2 for positive,negative parity coupled channels sets (respectively).
 
 <P>
 Energy <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img31.svg"
+ STYLE="height: 2.74ex; vertical-align: -0.66ex; " SRC="img31.svg"
  ALT="$\hbar^2k^2/2m$"></SPAN>, where <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img32.svg"
+ STYLE="height: 2.44ex; vertical-align: -0.66ex; " SRC="img32.svg"
  ALT="$k= f'/f$"></SPAN>, the logarithmic derivative
 for all radial basis states at <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img33.svg"
+ STYLE="height: 1.16ex; vertical-align: -0.10ex; " SRC="img33.svg"
  ALT="$r$"></SPAN>=RMATR, with <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img29.svg"
+ STYLE="height: 1.75ex; vertical-align: -0.13ex; " SRC="img29.svg"
  ALT="$k$"></SPAN> having the same
 sign as EBETA(i). 
 
 <P>
 5ex1
 If R-matrix solutions are selected (by IBLOCK<SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img12.svg"
+ STYLE="height: 1.49ex; vertical-align: -0.19ex; " SRC="img12.svg"
  ALT="$&lt;$"></SPAN>0) then all channels
 are `blocked' together and solved in a full CRC procedure.
 
 <P>
 5ex1
 If WEAK<SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img15.svg"
+ STYLE="height: 1.49ex; vertical-align: -0.19ex; " SRC="img15.svg"
  ALT="$&gt;$"></SPAN>0, then non-elastic columns of the R-matrix are set to zero,
   when penetrabilities <SPAN CLASS="MATH"><IMG
- STYLE=""
- SRC="img12.svg"
+ STYLE="height: 1.49ex; vertical-align: -0.19ex; " SRC="img12.svg"
  ALT="$&lt;$"></SPAN> WEAK.
 
 <P>

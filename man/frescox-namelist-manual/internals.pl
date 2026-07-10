@@ -10,6 +10,10 @@ $key = q/operator/;
 $ref_files{$key} = "$dir".q|node18.html|; 
 $noresave{$key} = "$nosave";
 
+$key = q/potentials/;
+$ref_files{$key} = "$dir".q|node8.html|; 
+$noresave{$key} = "$nosave";
+
 $key = q/spintransfers/;
 $ref_files{$key} = "$dir".q|node18.html|; 
 $noresave{$key} = "$nosave";
